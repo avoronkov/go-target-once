@@ -5,5 +5,5 @@ import (
 )
 
 type BuildContext interface {
-	GetDependency(dep int, args ...id.Interface) interface{}
+	GetDependency(dep int, args ...id.Interface) (interface{}, error)
 }

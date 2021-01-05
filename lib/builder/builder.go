@@ -17,11 +17,11 @@ func New(w warehouse.Warehouse) *Builder {
 	}
 }
 
-func (b *Builder) Build(t targets.Target, args ...id.Interface) (content interface{}) {
+func (b *Builder) Build(t targets.Target, args ...id.Interface) (content interface{}, err error) {
 	ready, cont := b.isReady(t, args...)
 	if ready {
 		log.Printf("[debug] (%v) Return content from cache.", t.TargetId())
-		return cont
+		return cont, nil
 	}
 
 	log.Printf("[debug] (%v) Rebuild content", t.TargetId())
@@ -29,9 +29,13 @@ func (b *Builder) Build(t targets.Target, args ...id.Interface) (content interfa
 		B: b,
 		T: t,
 	}
-	cont, tm := t.Build(bc, args...)
+	cont, tm, err := t.Build(bc, args...)
+	if err != nil {
+		return cont, err
+	}
+
 	b.w.Put(t.TargetId(), args, cont, tm)
-	return cont
+	return cont, nil
 }
 
 func (b *Builder) isReady(t targets.Target, args ...id.Interface) (bool, interface{}) {

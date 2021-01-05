@@ -8,6 +8,6 @@ import (
 
 var Default *Builder = New(warehouse.NewMemoryWarehouse())
 
-func Build(t targets.Target, args ...id.Interface) interface{} {
+func Build(t targets.Target, args ...id.Interface) (interface{}, error) {
 	return Default.Build(t, args...)
 }

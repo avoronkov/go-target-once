@@ -6,10 +6,10 @@ import (
 	"dont-repeat-twice/lib/targets"
 	"encoding/json"
 	"fmt"
-	"io/ioutil"
 	"log"
 	"net/http"
 	"os"
+	"strings"
 	"time"
 )
 
@@ -25,33 +25,33 @@ type BuildInfo struct {
 	targets.Common
 }
 
-func (b *BuildInfo) Build(bc targets.BuildContext, args ...id.Interface) (content interface{}, t time.Time) {
+func (b *BuildInfo) Build(bc targets.BuildContext, args ...id.Interface) (content interface{}, t time.Time, err error) {
 	now := time.Now()
-	path := bc.GetDependency(0)
-
-	f, err := os.Open(path.(string))
+	//
+	buildinfo, err := bc.GetDependency(0)
 	if err != nil {
-		log.Printf("[err] os.Open failed: %v", err)
-		return "404", now
+		return nil, time.Time{}, err
 	}
-	defer f.Close()
 
 	meta := make(map[string]interface{})
-	if err := json.NewDecoder(f).Decode(&meta); err != nil {
+	if err := json.Unmarshal(buildinfo.([]byte), &meta); err != nil {
 		log.Printf("[err] json.Decode failed: %v", err)
-		return "500", now
+		return nil, time.Time{}, err
 	}
 
-	envPath := bc.GetDependency(1)
-	environment, _ := ioutil.ReadFile(envPath.(string))
+	envContent, err := bc.GetDependency(1)
+	if err != nil {
+		return nil, time.Time{}, err
+	}
+	environment := strings.TrimSpace(string(envContent.([]byte)))
 	meta["environment"] = string(environment)
 
 	data, err := json.Marshal(meta)
 	if err != nil {
 		log.Printf("[err] json.Marshal failed: %v", err)
-		return "500", now
+		return nil, time.Time{}, err
 	}
-	return string(data), now
+	return string(data), now, nil
 }
 
 func (b *BuildInfo) IsModified(since time.Time) bool {
@@ -69,7 +69,12 @@ var metaTarget = &BuildInfo{
 }
 
 func metaHandler(w http.ResponseWriter, r *http.Request) {
-	data := builder.Build(metaTarget)
+	data, err := builder.Build(metaTarget)
+	if err != nil {
+		w.WriteHeader(http.StatusInternalServerError)
+		fmt.Fprintf(w, "%v\n", err)
+		return
+	}
 	fmt.Fprintf(w, "%v\n", data)
 }
 
