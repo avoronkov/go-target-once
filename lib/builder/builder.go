@@ -25,7 +25,11 @@ func (b *Builder) Build(t targets.Target, args ...id.Interface) (content interfa
 	}
 
 	log.Printf("[debug] (%v) Rebuild content", t.TargetId())
-	cont, tm := t.Build(args...)
+	bc := &BuildContext{
+		B: b,
+		T: t,
+	}
+	cont, tm := t.Build(bc, args...)
 	b.w.Put(t.TargetId(), args, cont, tm)
 	return cont
 }

@@ -1,3 +1,5 @@
+// +build drop
+
 package targets
 
 import (

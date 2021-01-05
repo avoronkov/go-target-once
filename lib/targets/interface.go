@@ -10,5 +10,5 @@ type Target interface {
 	IsModified(since time.Time) bool
 	Dependencies() []Target
 
-	Build(args ...id.Interface) (content interface{}, t time.Time)
+	Build(bc BuildContext, args ...id.Interface) (content interface{}, t time.Time)
 }

@@ -23,7 +23,7 @@ func (f *File) TargetId() string {
 	return f.path
 }
 
-func (f *File) Build(args ...id.Interface) (content interface{}, t time.Time) {
+func (f *File) Build(bc BuildContext, args ...id.Interface) (content interface{}, t time.Time) {
 	return f.path, time.Now()
 }
 
