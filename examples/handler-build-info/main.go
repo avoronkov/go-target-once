@@ -6,6 +6,7 @@ import (
 	"dont-repeat-twice/lib/targets"
 	"encoding/json"
 	"fmt"
+	"io/ioutil"
 	"log"
 	"net/http"
 	"os"
@@ -26,7 +27,7 @@ type BuildInfo struct {
 
 func (b *BuildInfo) Build(bc targets.BuildContext, args ...id.Interface) (content interface{}, t time.Time) {
 	now := time.Now()
-	path, _ := bc.GetDependency(0)
+	path := bc.GetDependency(0)
 
 	f, err := os.Open(path.(string))
 	if err != nil {
@@ -40,7 +41,11 @@ func (b *BuildInfo) Build(bc targets.BuildContext, args ...id.Interface) (conten
 		log.Printf("[err] json.Decode failed: %v", err)
 		return "500", now
 	}
-	meta["environment"] = environment()
+
+	envPath := bc.GetDependency(1)
+	environment, _ := ioutil.ReadFile(envPath.(string))
+	meta["environment"] = string(environment)
+
 	data, err := json.Marshal(meta)
 	if err != nil {
 		log.Printf("[err] json.Marshal failed: %v", err)
@@ -53,42 +58,12 @@ func (b *BuildInfo) IsModified(since time.Time) bool {
 	return b.Common.DepsModified(since)
 }
 
-/*
-var metaTarget = &targets.Custom{
-	Id:   "meta-target",
-	Deps: []targets.Target{targets.NewFile("build.json")},
-	DoBuild: func(this *targets.Custom, args ...id.Interface) (interface{}, time.Time) {
-		now := time.Now()
-		path, _ := this.Deps[0].Build()
-
-		f, err := os.Open(path.(string))
-		if err != nil {
-			log.Printf("[err] os.Open failed: %v", err)
-			return "404", now
-		}
-		defer f.Close()
-
-		meta := make(map[string]interface{})
-		if err := json.NewDecoder(f).Decode(&meta); err != nil {
-			log.Printf("[err] json.Decode failed: %v", err)
-			return "500", now
-		}
-		meta["environment"] = environment()
-		data, err := json.Marshal(meta)
-		if err != nil {
-			log.Printf("[err] json.Marshal failed: %v", err)
-			return "500", now
-		}
-		return string(data), now
-	},
-}
-*/
-
 var metaTarget = &BuildInfo{
 	Common: targets.Common{
 		Id: "buildinfo",
 		Deps: []targets.Target{
 			targets.NewFile("build.json"),
+			targets.NewFile("env.txt"),
 		},
 	},
 }

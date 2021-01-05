@@ -3,7 +3,6 @@ package builder
 import (
 	"dont-repeat-twice/lib/id"
 	"dont-repeat-twice/lib/targets"
-	"time"
 )
 
 type BuildContext struct {
@@ -13,11 +12,7 @@ type BuildContext struct {
 
 var _ targets.BuildContext = (*BuildContext)(nil)
 
-func (bc *BuildContext) GetDependency(dep int, args ...id.Interface) (content interface{}, t time.Time) {
+func (bc *BuildContext) GetDependency(dep int, args ...id.Interface) (content interface{}) {
 	d := bc.T.Dependencies()[dep]
-	dbc := &BuildContext{
-		B: bc.B,
-		T: d,
-	}
-	return d.Build(dbc, args...)
+	return bc.B.Build(d, args...)
 }
