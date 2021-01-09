@@ -2,7 +2,6 @@ package main
 
 import (
 	"dont-repeat-twice/lib/builder"
-	"dont-repeat-twice/lib/id"
 	"dont-repeat-twice/lib/targets"
 	"encoding/json"
 	"fmt"
@@ -25,7 +24,7 @@ type BuildInfo struct {
 	targets.Common
 }
 
-func (b *BuildInfo) Build(bc targets.BuildContext, args ...id.Interface) (content interface{}, t time.Time, err error) {
+func (b *BuildInfo) Build(bc targets.BuildContext) (content interface{}, t time.Time, err error) {
 	now := time.Now()
 	//
 	buildinfo, err := bc.GetDependency(0)

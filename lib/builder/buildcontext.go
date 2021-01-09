@@ -14,5 +14,5 @@ var _ targets.BuildContext = (*BuildContext)(nil)
 
 func (bc *BuildContext) GetDependency(dep int, args ...id.Interface) (content interface{}, err error) {
 	d := bc.T.Dependencies()[dep]
-	return bc.B.Build(d, args...)
+	return bc.B.Build(d)
 }

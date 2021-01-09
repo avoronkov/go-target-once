@@ -1,7 +1,6 @@
 package builder
 
 import (
-	"dont-repeat-twice/lib/id"
 	"dont-repeat-twice/lib/targets"
 	"dont-repeat-twice/lib/warehouse"
 	"log"
@@ -17,8 +16,8 @@ func New(w warehouse.Warehouse) *Builder {
 	}
 }
 
-func (b *Builder) Build(t targets.Target, args ...id.Interface) (content interface{}, err error) {
-	ready, cont := b.isReady(t, args...)
+func (b *Builder) Build(t targets.Target) (content interface{}, err error) {
+	ready, cont := b.isReady(t)
 	if ready {
 		log.Printf("[debug] (%v) Return content from cache.", t.TargetId())
 		return cont, nil
@@ -29,18 +28,18 @@ func (b *Builder) Build(t targets.Target, args ...id.Interface) (content interfa
 		B: b,
 		T: t,
 	}
-	cont, tm, err := t.Build(bc, args...)
+	cont, tm, err := t.Build(bc)
 	if err != nil {
 		return cont, err
 	}
 
-	b.w.Put(t.TargetId(), args, cont, tm)
+	b.w.Put(t.TargetId(), cont, tm)
 	return cont, nil
 }
 
-func (b *Builder) isReady(t targets.Target, args ...id.Interface) (bool, interface{}) {
+func (b *Builder) isReady(t targets.Target) (bool, interface{}) {
 	// Search for saved value
-	cont, tm, ok := b.w.Get(t.TargetId(), args)
+	cont, tm, ok := b.w.Get(t.TargetId())
 	if !ok {
 		return false, nil
 	}

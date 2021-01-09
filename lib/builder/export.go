@@ -1,13 +1,12 @@
 package builder
 
 import (
-	"dont-repeat-twice/lib/id"
 	"dont-repeat-twice/lib/targets"
 	"dont-repeat-twice/lib/warehouse"
 )
 
 var Default *Builder = New(warehouse.NewMemoryWarehouse())
 
-func Build(t targets.Target, args ...id.Interface) (interface{}, error) {
-	return Default.Build(t, args...)
+func Build(t targets.Target) (interface{}, error) {
+	return Default.Build(t)
 }

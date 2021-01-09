@@ -2,7 +2,6 @@ package main
 
 import (
 	"dont-repeat-twice/lib/builder"
-	"dont-repeat-twice/lib/id"
 	"dont-repeat-twice/lib/targets"
 	"fmt"
 	"log"
@@ -35,7 +34,7 @@ func (g *AsciiImage) Dependencies() []targets.Target {
 	}
 }
 
-func (g *AsciiImage) Build(bc targets.BuildContext, args ...id.Interface) (content interface{}, t time.Time, err error) {
+func (g *AsciiImage) Build(bc targets.BuildContext) (content interface{}, t time.Time, err error) {
 	now := time.Now()
 	data, err := bc.GetDependency(0)
 	if err != nil {
@@ -53,8 +52,14 @@ func (g *AsciiImage) IsModified(since time.Time) bool {
 }
 
 func handler(w http.ResponseWriter, r *http.Request) {
-	path := "https://" + strings.TrimLeft(r.URL.Path, "/")
-	log.Printf("path = %v", path)
+	path := strings.TrimLeft(r.URL.Path, "/")
+	httpsPrefix := "https:/"
+	if strings.HasPrefix(path, httpsPrefix) {
+		path = "https://" + path[len(httpsPrefix):]
+	} else {
+		path = "https://" + path
+	}
+	log.Printf("path (2) = %v", path)
 
 	resource := NewAsciiImage(path)
 	data, err := builder.Build(resource)

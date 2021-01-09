@@ -1,7 +1,6 @@
 package targets
 
 import (
-	"dont-repeat-twice/lib/id"
 	"io/ioutil"
 	"log"
 	"net/http"
@@ -24,7 +23,7 @@ func (u *Url) TargetId() string {
 	return u.url
 }
 
-func (u *Url) Build(bc BuildContext, args ...id.Interface) (content interface{}, t time.Time, e error) {
+func (u *Url) Build(bc BuildContext) (content interface{}, t time.Time, e error) {
 	resp, err := http.Get(u.url)
 	if err != nil {
 		e = err

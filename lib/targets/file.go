@@ -1,7 +1,6 @@
 package targets
 
 import (
-	"dont-repeat-twice/lib/id"
 	"io/ioutil"
 	"log"
 	"os"
@@ -24,7 +23,7 @@ func (f *File) TargetId() string {
 	return f.path
 }
 
-func (f *File) Build(bc BuildContext, args ...id.Interface) (content interface{}, t time.Time, e error) {
+func (f *File) Build(bc BuildContext) (content interface{}, t time.Time, e error) {
 	file, err := os.Open(f.path)
 	if err != nil {
 		e = err
