@@ -1,13 +1,15 @@
 package warehouse
 
 import (
+	"sync"
 	"time"
 )
 
 var _ Warehouse = (*MemoryWarehouse)(nil)
 
 type MemoryWarehouse struct {
-	data map[string]memRecord
+	data  map[string]memRecord
+	mutex sync.RWMutex
 }
 
 func NewMemoryWarehouse() *MemoryWarehouse {
@@ -17,6 +19,9 @@ func NewMemoryWarehouse() *MemoryWarehouse {
 }
 
 func (w *MemoryWarehouse) Get(targetId string) (content interface{}, t time.Time, ok bool) {
+	w.mutex.RLock()
+	defer w.mutex.RUnlock()
+
 	mr, exists := w.data[targetId]
 	if !exists {
 		return
@@ -29,6 +34,9 @@ func (w *MemoryWarehouse) Put(targetId string, content interface{}, t time.Time)
 		Content: content,
 		Time:    t,
 	}
+
+	w.mutex.Lock()
+	defer w.mutex.Unlock()
 
 	w.data[targetId] = mr
 }

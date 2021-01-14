@@ -35,6 +35,9 @@ func (g *Tgt) Build(bc targets.BuildContext) (content interface{}, t time.Time, 
 	log.Printf("[%v] Build()", g.TargetId())
 	s := new(strings.Builder)
 	for k := range g.deps {
+		if k == "2" {
+			continue
+		}
 		res, err := bc.GetDependency(k)
 		fmt.Fprintf(s, "%v * %v => %v (%v)\n", k, k, res, err)
 	}

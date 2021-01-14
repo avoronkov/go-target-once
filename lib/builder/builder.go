@@ -23,15 +23,15 @@ func (b *Builder) Build(t targets.Target) (content interface{}, err error) {
 		return cont, nil
 	}
 
+	bc := NewBuildContext(b, t)
+
 	log.Printf("[debug] (%v) Rebuild content", t.TargetId())
-	bc := &BuildContext{
-		B: b,
-		T: t,
-	}
 	cont, tm, err := t.Build(bc)
 	if err != nil {
 		return cont, err
 	}
+
+	go bc.Close()
 
 	b.w.Put(t.TargetId(), cont, tm)
 	return cont, nil
@@ -59,7 +59,6 @@ func (b *Builder) isReady(t targets.Target) (bool, interface{}) {
 				}
 			}
 		}
-
 	}
 	return true, cont
 }
