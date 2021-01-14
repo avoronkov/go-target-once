@@ -7,7 +7,10 @@ import (
 type Target interface {
 	TargetId() string
 	IsModified(since time.Time) bool
-	Dependencies() []Target
 
 	Build(bc BuildContext) (interface{}, time.Time, error)
+}
+
+type WithDependencies interface {
+	Dependencies() map[string]Target
 }

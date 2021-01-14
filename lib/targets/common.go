@@ -7,7 +7,7 @@ import (
 
 type Common struct {
 	Id   string
-	Deps []Target
+	Deps map[string]Target
 }
 
 func (c Common) TargetId() string {
@@ -17,7 +17,7 @@ func (c Common) TargetId() string {
 	return c.Id
 }
 
-func (c Common) Dependencies() []Target {
+func (c Common) Dependencies() map[string]Target {
 	return c.Deps
 }
 

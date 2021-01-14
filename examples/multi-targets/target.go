@@ -10,27 +10,33 @@ import (
 
 type Tgt struct {
 	values []int
+	deps   map[string]targets.Target
 }
 
 var _ targets.Target = (*Tgt)(nil)
+var _ targets.WithDependencies = (*Tgt)(nil)
 
 func NewTgt(values ...int) *Tgt {
-	return &Tgt{values: values}
+	deps := make(map[string]targets.Target)
+	for _, v := range values {
+		deps[fmt.Sprintf("%v", v)] = NewSubTgt(v)
+	}
+	return &Tgt{
+		values: values,
+		deps:   deps,
+	}
 }
 
-func (g *Tgt) Dependencies() (deps []targets.Target) {
-	for _, v := range g.values {
-		deps = append(deps, NewSubTgt(v))
-	}
-	return
+func (g *Tgt) Dependencies() map[string]targets.Target {
+	return g.deps
 }
 
 func (g *Tgt) Build(bc targets.BuildContext) (content interface{}, t time.Time, err error) {
 	log.Printf("[%v] Build()", g.TargetId())
 	s := new(strings.Builder)
-	for i, v := range g.values {
-		res, err := bc.GetDependency(i)
-		fmt.Fprintf(s, "%v * %v => %v (%v)\n", v, v, res, err)
+	for k := range g.deps {
+		res, err := bc.GetDependency(k)
+		fmt.Fprintf(s, "%v * %v => %v (%v)\n", k, k, res, err)
 	}
 	return s.String(), time.Now(), nil
 }

@@ -48,10 +48,14 @@ func (b *Builder) isReady(t targets.Target) (bool, interface{}) {
 		return false, nil
 	}
 
-	for _, dep := range t.Dependencies() {
-		if dep.IsModified(tm) {
-			return false, nil
+	if targetWithDeps, ok := t.(targets.WithDependencies); ok {
+		for _, dep := range targetWithDeps.Dependencies() {
+			// There is an error here
+			if dep.IsModified(tm) {
+				return false, nil
+			}
 		}
+
 	}
 	return true, cont
 }

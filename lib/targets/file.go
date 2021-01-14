@@ -53,7 +53,3 @@ func (f *File) IsModified(since time.Time) bool {
 	}
 	return fi.ModTime().After(since)
 }
-
-func (f *File) Dependencies() []Target {
-	return nil
-}

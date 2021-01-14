@@ -72,7 +72,3 @@ func lastModified(resp *http.Response) (time.Time, bool) {
 	}
 	return lastTime, true
 }
-
-func (u *Url) Dependencies() []Target {
-	return nil
-}

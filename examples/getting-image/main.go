@@ -16,6 +16,7 @@ type AsciiImage struct {
 }
 
 var _ targets.Target = (*AsciiImage)(nil)
+var _ targets.WithDependencies = (*AsciiImage)(nil)
 
 func NewAsciiImage(url string) *AsciiImage {
 	return &AsciiImage{
@@ -28,15 +29,15 @@ func (g *AsciiImage) TargetId() string {
 	return fmt.Sprintf("web-resource-%v", g.url)
 }
 
-func (g *AsciiImage) Dependencies() []targets.Target {
-	return []targets.Target{
-		g.target,
+func (g *AsciiImage) Dependencies() map[string]targets.Target {
+	return map[string]targets.Target{
+		"image": g.target,
 	}
 }
 
 func (g *AsciiImage) Build(bc targets.BuildContext) (content interface{}, t time.Time, err error) {
 	now := time.Now()
-	data, err := bc.GetDependency(0)
+	data, err := bc.GetDependency("image")
 	if err != nil {
 		return nil, time.Time{}, err
 	}

@@ -27,7 +27,7 @@ type BuildInfo struct {
 func (b *BuildInfo) Build(bc targets.BuildContext) (content interface{}, t time.Time, err error) {
 	now := time.Now()
 	//
-	buildinfo, err := bc.GetDependency(0)
+	buildinfo, err := bc.GetDependency("build.json")
 	if err != nil {
 		return nil, time.Time{}, err
 	}
@@ -38,7 +38,7 @@ func (b *BuildInfo) Build(bc targets.BuildContext) (content interface{}, t time.
 		return nil, time.Time{}, err
 	}
 
-	envContent, err := bc.GetDependency(1)
+	envContent, err := bc.GetDependency("env.txt")
 	if err != nil {
 		return nil, time.Time{}, err
 	}
@@ -59,10 +59,10 @@ func (b *BuildInfo) IsModified(since time.Time) bool {
 
 var metaTarget = &BuildInfo{
 	Common: targets.Common{
-		Id: "buildinfo",
-		Deps: []targets.Target{
-			targets.NewFile("build.json"),
-			targets.NewFile("env.txt"),
+		Id: "buildinfo-handler",
+		Deps: map[string]targets.Target{
+			"build.json": targets.NewFile("build.json"),
+			"env.txt":    targets.NewFile("env.txt"),
 		},
 	},
 }
