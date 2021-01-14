@@ -12,6 +12,7 @@ type Url struct {
 }
 
 var _ Target = (*Url)(nil)
+var _ Modifiable = (*Url)(nil)
 
 func NewUrl(url string) *Url {
 	return &Url{

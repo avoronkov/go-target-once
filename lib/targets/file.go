@@ -12,6 +12,7 @@ type File struct {
 }
 
 var _ Target = (*File)(nil)
+var _ Modifiable = (*File)(nil)
 
 func NewFile(path string) *File {
 	return &File{

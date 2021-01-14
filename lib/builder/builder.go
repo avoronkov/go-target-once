@@ -44,15 +44,19 @@ func (b *Builder) isReady(t targets.Target) (bool, interface{}) {
 		return false, nil
 	}
 
-	if t.IsModified(tm) {
-		return false, nil
+	if mod, ok := t.(targets.Modifiable); ok {
+		if mod.IsModified(tm) {
+			return false, nil
+		}
 	}
 
 	if targetWithDeps, ok := t.(targets.WithDependencies); ok {
 		for _, dep := range targetWithDeps.Dependencies() {
 			// There is an error here
-			if dep.IsModified(tm) {
-				return false, nil
+			if mod, ok := dep.(targets.Modifiable); ok {
+				if mod.IsModified(tm) {
+					return false, nil
+				}
 			}
 		}
 

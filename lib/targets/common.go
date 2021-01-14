@@ -23,8 +23,10 @@ func (c Common) Dependencies() map[string]Target {
 
 func (c Common) DepsModified(since time.Time) bool {
 	for _, t := range c.Deps {
-		if t.IsModified(since) {
-			return true
+		if mod, ok := t.(Modifiable); ok {
+			if mod.IsModified(since) {
+				return true
+			}
 		}
 	}
 	return false

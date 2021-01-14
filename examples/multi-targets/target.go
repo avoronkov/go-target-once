@@ -41,11 +41,6 @@ func (g *Tgt) Build(bc targets.BuildContext) (content interface{}, t time.Time, 
 	return s.String(), time.Now(), nil
 }
 
-func (g *Tgt) IsModified(since time.Time) bool {
-	log.Printf("[%v] IsModified()", g.TargetId())
-	return true
-}
-
 func (g *Tgt) TargetId() string {
 	return fmt.Sprintf("target-%v", g.values)
 }
