@@ -49,10 +49,6 @@ func (g *AsciiImage) Build(bc targets.BuildContext) (content interface{}, t time
 	return []byte(ascii), now, nil
 }
 
-func (g *AsciiImage) IsModified(since time.Time) bool {
-	return g.target.IsModified(since)
-}
-
 func handler(w http.ResponseWriter, r *http.Request) {
 	path := strings.TrimLeft(r.URL.Path, "/")
 	httpsPrefix := "https:/"
