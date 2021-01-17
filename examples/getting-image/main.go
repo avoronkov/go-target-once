@@ -1,13 +1,14 @@
 package main
 
 import (
-	"dont-repeat-twice/lib/builder"
-	"dont-repeat-twice/lib/targets"
 	"fmt"
 	"log"
 	"net/http"
 	"strings"
 	"time"
+
+	"github.com/avoronkov/go-target-once/lib/builder"
+	"github.com/avoronkov/go-target-once/lib/targets"
 )
 
 type AsciiImage struct {

@@ -6,7 +6,7 @@ import (
 	"fmt"
 	"time"
 
-	"dont-repeat-twice/lib/id"
+	"github.com/avoronkov/go-target-once/lib/id"
 )
 
 type Custom struct {

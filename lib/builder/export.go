@@ -1,8 +1,8 @@
 package builder
 
 import (
-	"dont-repeat-twice/lib/targets"
-	"dont-repeat-twice/lib/warehouse"
+	"github.com/avoronkov/go-target-once/lib/targets"
+	"github.com/avoronkov/go-target-once/lib/warehouse"
 )
 
 var Default *Builder = New(warehouse.NewMemoryWarehouse())

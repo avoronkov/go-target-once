@@ -1,12 +1,13 @@
 package builder
 
 import (
-	"dont-repeat-twice/lib/targets"
-	"dont-repeat-twice/lib/warehouse"
 	"log"
 	"sync"
 	"sync/atomic"
 	"time"
+
+	"github.com/avoronkov/go-target-once/lib/targets"
+	"github.com/avoronkov/go-target-once/lib/warehouse"
 )
 
 type Builder struct {

@@ -1,11 +1,12 @@
 package main
 
 import (
-	"dont-repeat-twice/lib/targets"
 	"fmt"
 	"log"
 	"strings"
 	"time"
+
+	"github.com/avoronkov/go-target-once/lib/targets"
 )
 
 type Tgt struct {

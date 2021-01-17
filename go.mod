@@ -1,5 +1,3 @@
-module dont-repeat-twice
+module github.com/avoronkov/go-target-once
 
 go 1.15
-
-require github.com/tinygo-org/tinygo v0.16.0

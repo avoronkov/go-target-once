@@ -1,11 +1,12 @@
 package main
 
 import (
-	"dont-repeat-twice/lib/builder"
 	"fmt"
 	"log"
 	"runtime"
 	"time"
+
+	"github.com/avoronkov/go-target-once/lib/builder"
 )
 
 func main() {

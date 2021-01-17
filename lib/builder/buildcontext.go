@@ -1,8 +1,9 @@
 package builder
 
 import (
-	"dont-repeat-twice/lib/targets"
 	"log"
+
+	"github.com/avoronkov/go-target-once/lib/targets"
 )
 
 type BuildContext struct {

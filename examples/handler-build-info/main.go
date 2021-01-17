@@ -1,8 +1,6 @@
 package main
 
 import (
-	"dont-repeat-twice/lib/builder"
-	"dont-repeat-twice/lib/targets"
 	"encoding/json"
 	"fmt"
 	"log"
@@ -10,6 +8,9 @@ import (
 	"os"
 	"strings"
 	"time"
+
+	"github.com/avoronkov/go-target-once/lib/builder"
+	"github.com/avoronkov/go-target-once/lib/targets"
 )
 
 func environment() string {
