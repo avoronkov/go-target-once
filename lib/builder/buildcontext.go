@@ -1,8 +1,7 @@
 package builder
 
 import (
-	"log"
-
+	"github.com/avoronkov/go-target-once/lib/logger"
 	"github.com/avoronkov/go-target-once/lib/targets"
 )
 
@@ -34,11 +33,11 @@ func (bc *BuildContext) GetDependency(dep string) (content interface{}, err erro
 }
 
 func (bc *BuildContext) Close() error {
-	log.Printf("BuildContext: closing...")
+	logger.Debugf("BuildContext: closing...")
 	for _, ch := range bc.contents {
 		<-ch
 	}
-	log.Printf("BuildContext: closed.")
+	logger.Debugf("BuildContext: closed.")
 	return nil
 }
 

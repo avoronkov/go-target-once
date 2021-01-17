@@ -1,11 +1,11 @@
 package builder
 
 import (
-	"log"
 	"sync"
 	"sync/atomic"
 	"time"
 
+	"github.com/avoronkov/go-target-once/lib/logger"
 	"github.com/avoronkov/go-target-once/lib/targets"
 	"github.com/avoronkov/go-target-once/lib/warehouse"
 )
@@ -23,13 +23,13 @@ func New(w warehouse.Warehouse) *Builder {
 func (b *Builder) Build(t targets.Target) (content interface{}, err error) {
 	ready, cont := b.isReady(t)
 	if ready {
-		log.Printf("[debug] (%v) Return content from cache.", t.TargetId())
+		logger.Debugf("(%v) Return content from cache.", t.TargetId())
 		return cont, nil
 	}
 
 	bc := NewBuildContext(b, t)
 
-	log.Printf("[debug] (%v) Rebuild content", t.TargetId())
+	logger.Debugf("(%v) Rebuild content", t.TargetId())
 	cont, tm, err := t.Build(bc)
 	if err != nil {
 		return cont, err

@@ -2,9 +2,10 @@ package targets
 
 import (
 	"io/ioutil"
-	"log"
 	"os"
 	"time"
+
+	"github.com/avoronkov/go-target-once/lib/logger"
 )
 
 type File struct {
@@ -49,7 +50,7 @@ func (f *File) Build(bc BuildContext) (content interface{}, t time.Time, e error
 func (f *File) IsModified(since time.Time) bool {
 	fi, err := os.Stat(f.path)
 	if err != nil {
-		log.Printf("[WARN] Cannot stat file: %v", err)
+		logger.Warningf("Cannot stat file: %v", err)
 		return true
 	}
 	return fi.ModTime().After(since)

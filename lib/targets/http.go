@@ -2,9 +2,10 @@ package targets
 
 import (
 	"io/ioutil"
-	"log"
 	"net/http"
 	"time"
+
+	"github.com/avoronkov/go-target-once/lib/logger"
 )
 
 type Url struct {
@@ -50,7 +51,7 @@ var lastModifiedFmt = time.RFC1123
 func (u *Url) IsModified(since time.Time) bool {
 	resp, err := http.Head(u.url)
 	if err != nil {
-		log.Printf("[warn] HEAD %v failed: %v", u.url, err)
+		logger.Warningf("HEAD %v failed: %v", u.url, err)
 		return true
 	}
 	lastTime, ok := lastModified(resp)
@@ -63,12 +64,12 @@ func (u *Url) IsModified(since time.Time) bool {
 func lastModified(resp *http.Response) (time.Time, bool) {
 	last := resp.Header.Get("Last-Modified")
 	if last == "" {
-		log.Printf("[warn] Last-Modified is empty")
+		logger.Warningf("Last-Modified is empty")
 		return time.Time{}, false
 	}
 	lastTime, err := time.Parse(lastModifiedFmt, last)
 	if err != nil {
-		log.Printf("[warn] Cannot parse Last-Modified: %v (%v)", last, err)
+		logger.Warningf("Cannot parse Last-Modified: %v (%v)", last, err)
 		return time.Time{}, false
 	}
 	return lastTime, true
