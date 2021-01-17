@@ -4,6 +4,9 @@ import (
 	"dont-repeat-twice/lib/targets"
 	"dont-repeat-twice/lib/warehouse"
 	"log"
+	"sync"
+	"sync/atomic"
+	"time"
 )
 
 type Builder struct {
@@ -37,6 +40,35 @@ func (b *Builder) Build(t targets.Target) (content interface{}, err error) {
 	return cont, nil
 }
 
+func (b *Builder) IsModified(t targets.Target, since time.Time) bool {
+	var modified int32
+	var wg sync.WaitGroup
+
+	if mod, ok := t.(targets.Modifiable); ok {
+		wg.Add(1)
+		go func() {
+			defer wg.Done()
+			if mod.IsModified(since) {
+				atomic.StoreInt32(&modified, 1)
+			}
+		}()
+	}
+
+	if wd, ok := t.(targets.WithDependencies); ok {
+		deps := wd.Dependencies()
+		wg.Add(len(deps))
+		for _, dep := range wd.Dependencies() {
+			go func(d targets.Target) {
+				defer wg.Done()
+				if b.IsModified(d, since) {
+					atomic.StoreInt32(&modified, 1)
+				}
+			}(dep)
+		}
+	}
+	return modified > 0
+}
+
 func (b *Builder) isReady(t targets.Target) (bool, interface{}) {
 	// Search for saved value
 	cont, tm, ok := b.w.Get(t.TargetId())
@@ -48,6 +80,10 @@ func (b *Builder) isReady(t targets.Target) (bool, interface{}) {
 		if mod.IsModified(tm) {
 			return false, nil
 		}
+	}
+
+	if b.IsModified(t, tm) {
+		return false, nil
 	}
 
 	if targetWithDeps, ok := t.(targets.WithDependencies); ok {
