@@ -70,3 +70,7 @@ func (bc *BuildContext) buildDependencies() {
 func (bc *BuildContext) Build(t targets.Target) (content interface{}, err error) {
 	return bc.B.Build(t)
 }
+
+func (bc *BuildContext) Builds(ts ...targets.Target) (contents []interface{}, errs []error) {
+	return bc.B.Builds(ts...)
+}
