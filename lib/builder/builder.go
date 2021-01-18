@@ -20,6 +20,24 @@ func New(w warehouse.Warehouse) *Builder {
 	}
 }
 
+func (b *Builder) Builds(ts ...targets.Target) (contents []interface{}, errs []error) {
+	l := len(ts)
+	contents = make([]interface{}, l)
+	errs = make([]error, l)
+	var wg sync.WaitGroup
+	wg.Add(l)
+	for index, target := range ts {
+		go func(i int, t targets.Target) {
+			defer wg.Done()
+			content, err := b.Build(t)
+			contents[i] = content
+			errs[i] = err
+		}(index, target)
+	}
+	wg.Wait()
+	return
+}
+
 func (b *Builder) Build(t targets.Target) (content interface{}, err error) {
 	ready, cont := b.isReady(t)
 	if ready {
