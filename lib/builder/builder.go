@@ -55,7 +55,15 @@ func (b *Builder) Build(t targets.Target) (content interface{}, err error) {
 
 	go bc.Close()
 
-	b.w.Put(t.TargetId(), cont, tm)
+	// Cache only cachable targets
+	if c, ok := t.(targets.Cachable); ok && c.Cachable() {
+		var opts []warehouse.Option
+		if v, ok := t.(targets.ValidFor); ok {
+			opts = append(opts, warehouse.OptValidFor(v.ValidFor()))
+		}
+		b.w.Put(t.TargetId(), cont, tm, opts...)
+	}
+
 	return cont, nil
 }
 

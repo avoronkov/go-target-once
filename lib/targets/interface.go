@@ -17,3 +17,11 @@ type WithDependencies interface {
 type Modifiable interface {
 	IsModified(since time.Time) bool
 }
+
+type Cachable interface {
+	Cachable() bool
+}
+
+type ValidFor interface {
+	ValidFor() time.Duration
+}
