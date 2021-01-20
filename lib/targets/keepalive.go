@@ -28,14 +28,15 @@ func (k *keepAlive) IsModified(since time.Time) bool {
 }
 
 func (k *keepAlive) Dependencies() map[string]Target {
-	if wd, ok := k.T.(WithDependencies); ok {
-		return wd.Dependencies()
+	return map[string]Target{
+		"target": k.T,
 	}
-	return map[string]Target{}
 }
 
 func (k *keepAlive) Build(bc BuildContext) (interface{}, time.Time, error) {
-	return k.T.Build(bc)
+	content, err := bc.GetDependency("target")
+	// Fix Build() interface
+	return content, time.Now(), err
 }
 
 func (k *keepAlive) ValidFor() time.Duration {
@@ -45,3 +46,6 @@ func (k *keepAlive) ValidFor() time.Duration {
 func (k *keepAlive) Cachable() bool {
 	return true
 }
+
+// Some hack to skip dependencies check
+func (k *keepAlive) KeepingAlive() {}

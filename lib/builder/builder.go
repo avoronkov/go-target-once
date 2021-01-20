@@ -113,6 +113,11 @@ func (b *Builder) isReady(t targets.Target) (bool, interface{}) {
 		return false, nil
 	}
 
+	if _, ok := t.(targets.KeepingAlive); ok {
+		// Skip checking of dependencies
+		return true, cont
+	}
+
 	if targetWithDeps, ok := t.(targets.WithDependencies); ok {
 		for _, dep := range targetWithDeps.Dependencies() {
 			// There is an error here

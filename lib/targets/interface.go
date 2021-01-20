@@ -25,3 +25,7 @@ type Cachable interface {
 type ValidFor interface {
 	ValidFor() time.Duration
 }
+
+type KeepingAlive interface {
+	KeepingAlive()
+}
