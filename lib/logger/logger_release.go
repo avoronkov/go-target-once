@@ -2,11 +2,8 @@
 
 package logger
 
-import (
-	"io/ioutil"
-	"log"
-)
+func Debugf(format string, v ...interface{}) {
+}
 
-func init() {
-	Logger = log.New(ioutil.Discard, "[go-target-once] ", log.LstdFlags)
+func Warningf(format string, v ...interface{}) {
 }
