@@ -8,7 +8,8 @@ type keepAlive struct {
 }
 
 var _ Target = (*keepAlive)(nil)
-var _ Modifiable = (*File)(nil)
+var _ Modifiable = (*keepAlive)(nil)
+var _ WithDependencies = (*keepAlive)(nil)
 
 func KeepAlive(t Target, d time.Duration) Target {
 	return &keepAlive{
@@ -23,6 +24,13 @@ func (k *keepAlive) TargetId() string {
 
 func (k *keepAlive) IsModified(since time.Time) bool {
 	return false
+}
+
+func (k *keepAlive) Dependencies() map[string]Target {
+	if wd, ok := k.T.(WithDependencies); ok {
+		return wd.Dependencies()
+	}
+	return map[string]Target{}
 }
 
 func (k *keepAlive) Build(bc BuildContext) (interface{}, time.Time, error) {
