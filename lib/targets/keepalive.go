@@ -10,6 +10,7 @@ type keepAlive struct {
 var _ Target = (*keepAlive)(nil)
 var _ Modifiable = (*keepAlive)(nil)
 var _ WithDependencies = (*keepAlive)(nil)
+var _ Cachable = (*keepAlive)(nil)
 
 func KeepAlive(t Target, d time.Duration) Target {
 	return &keepAlive{
@@ -39,4 +40,8 @@ func (k *keepAlive) Build(bc BuildContext) (interface{}, time.Time, error) {
 
 func (k *keepAlive) ValidFor() time.Duration {
 	return k.duration
+}
+
+func (k *keepAlive) Cachable() bool {
+	return true
 }
