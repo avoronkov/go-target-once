@@ -69,7 +69,7 @@ var metaTarget = &BuildInfo{
 }
 
 func metaHandler(w http.ResponseWriter, r *http.Request) {
-	data, err := builder.Build(metaTarget)
+	data, _, err := builder.Build(metaTarget)
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
 		fmt.Fprintf(w, "%v\n", err)

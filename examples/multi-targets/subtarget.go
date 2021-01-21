@@ -36,3 +36,7 @@ func (s *SubTgt) IsModified(since time.Time) (m bool) {
 func (s *SubTgt) TargetId() string {
 	return fmt.Sprintf("sub-target-%d", s.value)
 }
+
+func (s *SubTgt) Cachable() bool {
+	return true
+}

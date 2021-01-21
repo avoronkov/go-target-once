@@ -20,17 +20,19 @@ func New(w warehouse.Warehouse) *Builder {
 	}
 }
 
-func (b *Builder) Builds(ts ...targets.Target) (contents []interface{}, errs []error) {
+func (b *Builder) Builds(ts ...targets.Target) (contents []interface{}, times []time.Time, errs []error) {
 	l := len(ts)
 	contents = make([]interface{}, l)
+	times = make([]time.Time, l)
 	errs = make([]error, l)
 	var wg sync.WaitGroup
 	wg.Add(l)
 	for index, target := range ts {
 		go func(i int, t targets.Target) {
 			defer wg.Done()
-			content, err := b.Build(t)
+			content, tm, err := b.Build(t)
 			contents[i] = content
+			times[i] = tm
 			errs[i] = err
 		}(index, target)
 	}
@@ -38,19 +40,19 @@ func (b *Builder) Builds(ts ...targets.Target) (contents []interface{}, errs []e
 	return
 }
 
-func (b *Builder) Build(t targets.Target) (content interface{}, err error) {
-	ready, cont := b.isReady(t)
+func (b *Builder) Build(t targets.Target) (content interface{}, tm time.Time, err error) {
+	ready, cont, tm := b.isReady(t)
 	if ready {
 		logger.Debugf("(%v) Return content from cache.", t.TargetId())
-		return cont, nil
+		return cont, tm, nil
 	}
 
 	bc := NewBuildContext(b, t)
 
 	logger.Debugf("(%v) Rebuild content", t.TargetId())
-	cont, tm, err := t.Build(bc)
+	cont, tm, err = t.Build(bc)
 	if err != nil {
-		return cont, err
+		return cont, tm, err
 	}
 
 	go bc.Close()
@@ -64,7 +66,7 @@ func (b *Builder) Build(t targets.Target) (content interface{}, err error) {
 		b.w.Put(t.TargetId(), cont, tm, opts...)
 	}
 
-	return cont, nil
+	return cont, tm, nil
 }
 
 func (b *Builder) IsModified(t targets.Target, since time.Time) bool {
@@ -96,26 +98,26 @@ func (b *Builder) IsModified(t targets.Target, since time.Time) bool {
 	return modified > 0
 }
 
-func (b *Builder) isReady(t targets.Target) (bool, interface{}) {
+func (b *Builder) isReady(t targets.Target) (bool, interface{}, time.Time) {
 	// Search for saved value
 	cont, tm, ok := b.w.Get(t.TargetId())
 	if !ok {
-		return false, nil
+		return false, nil, time.Time{}
 	}
 
 	if mod, ok := t.(targets.Modifiable); ok {
 		if mod.IsModified(tm) {
-			return false, nil
+			return false, nil, time.Time{}
 		}
 	}
 
 	if b.IsModified(t, tm) {
-		return false, nil
+		return false, nil, time.Time{}
 	}
 
 	if _, ok := t.(targets.KeepingAlive); ok {
 		// Skip checking of dependencies
-		return true, cont
+		return true, cont, tm
 	}
 
 	if targetWithDeps, ok := t.(targets.WithDependencies); ok {
@@ -123,10 +125,10 @@ func (b *Builder) isReady(t targets.Target) (bool, interface{}) {
 			// There is an error here
 			if mod, ok := dep.(targets.Modifiable); ok {
 				if mod.IsModified(tm) {
-					return false, nil
+					return false, nil, time.Time{}
 				}
 			}
 		}
 	}
-	return true, cont
+	return true, cont, tm
 }

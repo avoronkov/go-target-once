@@ -60,7 +60,7 @@ func handler(w http.ResponseWriter, r *http.Request) {
 	log.Printf("path (2) = %v", path)
 
 	resource := NewAsciiImage(path)
-	data, err := builder.Build(resource)
+	data, _, err := builder.Build(resource)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return

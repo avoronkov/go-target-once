@@ -48,3 +48,7 @@ func (g *Tgt) Build(bc targets.BuildContext) (content interface{}, t time.Time, 
 func (g *Tgt) TargetId() string {
 	return fmt.Sprintf("target-%v", g.values)
 }
+
+func (g *Tgt) Cachable() bool {
+	return true
+}

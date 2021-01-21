@@ -56,11 +56,11 @@ func main() {
 	target := new(GopherTarget)
 
 	// Build target the first time
-	result, err := builder.Build(target)
-	fmt.Printf("[1] %v (err=%v)\n", result, err)
+	result, tm, err := builder.Build(target)
+	fmt.Printf("[1] %v (time=%v, err=%v)\n", result, tm, err)
 
 	// Rebuild the target.
 	// GopherTarget.Build will not be called if image on server is unchanged.
-	result, err = builder.Build(target)
-	fmt.Printf("[2] %v (err=%v)\n", result, err)
+	result, tm, err = builder.Build(target)
+	fmt.Printf("[2] %v (time=%v, err=%v)\n", result, tm, err)
 }

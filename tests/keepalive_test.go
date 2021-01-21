@@ -63,11 +63,11 @@ func (d *TestDependency) IsModified(since time.Time) bool {
 
 func ExampleKeepAlive() {
 	t1 := targets.KeepAlive(&TestTarget{}, 1*time.Minute)
-	result, err := builder.Build(t1)
+	result, _, err := builder.Build(t1)
 	fmt.Printf("Built (1): %v (%v)\n", result, err)
 
 	t2 := targets.KeepAlive(&TestTarget{}, 1*time.Minute)
-	result, err = builder.Build(t2)
+	result, _, err = builder.Build(t2)
 	fmt.Printf("Built (2): %v (%v)\n", result, err)
 	// Output:
 	// Dependency: Build()

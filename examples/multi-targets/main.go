@@ -13,7 +13,7 @@ func main() {
 	t := NewTgt(1, 2, 3, 5, 8, 13, 21)
 
 	for {
-		res, err := builder.Build(t)
+		res, _, err := builder.Build(t)
 		if err != nil {
 			log.Fatal(err)
 		}

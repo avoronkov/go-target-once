@@ -1,6 +1,8 @@
 package builder
 
 import (
+	"time"
+
 	"github.com/avoronkov/go-target-once/lib/logger"
 	"github.com/avoronkov/go-target-once/lib/targets"
 )
@@ -57,9 +59,10 @@ func (bc *BuildContext) buildDependencies() {
 		for name, dep := range deps {
 			go func(n string, d targets.Target) {
 				defer close(bc.contents[n])
-				cont, err := bc.B.Build(d)
+				cont, tm, err := bc.B.Build(d)
 				bc.contents[n] <- contentError{
 					content: cont,
+					tm:      tm,
 					err:     err,
 				}
 			}(name, dep)
@@ -67,10 +70,10 @@ func (bc *BuildContext) buildDependencies() {
 	}()
 }
 
-func (bc *BuildContext) Build(t targets.Target) (content interface{}, err error) {
+func (bc *BuildContext) Build(t targets.Target) (content interface{}, tm time.Time, err error) {
 	return bc.B.Build(t)
 }
 
-func (bc *BuildContext) Builds(ts ...targets.Target) (contents []interface{}, errs []error) {
+func (bc *BuildContext) Builds(ts ...targets.Target) (contents []interface{}, times []time.Time, errs []error) {
 	return bc.B.Builds(ts...)
 }
