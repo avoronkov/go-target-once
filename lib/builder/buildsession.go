@@ -18,6 +18,7 @@ type BuildSession struct {
 func NewBuildSession(globalCache warehouse.Warehouse) *BuildSession {
 	return &BuildSession{
 		targetResults: make(map[string]*ObservableResult),
+		globalCache:   globalCache,
 	}
 }
 
@@ -33,6 +34,27 @@ func (bc *BuildSession) Build(t targets.Target) (content interface{}, tm time.Ti
 	// Create observable results
 	for t := range tgts {
 		bc.targetResults[t] = NewObservable()
+	}
+
+	// Check cached targets
+T:
+	for id, meta := range tgts {
+		if ct, ok := meta.t.(targets.Cachable); ok && ct.Cachable() {
+			cont, tm, ok := bc.globalCache.Get(id)
+			if !ok {
+				continue T
+			}
+			// check all subtargets are not modified
+			// TODO
+
+			// If OK then put content into targetResults
+			bc.targetResults[id].Put(&buildResult{
+				C: cont,
+				T: tm,
+			})
+			// and remove target and subtargets from tgts
+			bc.removeTargetWithDeps(id, &tgts)
+		}
 	}
 
 	// Build
@@ -98,6 +120,19 @@ func (bc *BuildSession) fillTargetDeps(t targets.Target, tgts *map[string]*targe
 		meta.depsNames = namesMp
 	}
 	(*tgts)[tid] = meta
+}
+
+func (bc *BuildSession) removeTargetWithDeps(id string, tgts *map[string]*targetMeta) {
+	meta := (*tgts)[id]
+
+	for _, depId := range meta.depsNames {
+		bc.removeTargetWithDeps(depId, tgts)
+	}
+
+	meta.refCounter--
+	if meta.refCounter == 0 {
+		delete(*tgts, id)
+	}
 }
 
 type buildResult struct {

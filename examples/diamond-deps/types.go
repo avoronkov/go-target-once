@@ -69,6 +69,10 @@ func (c *C) Dependencies() map[string]targets.Target {
 	}
 }
 
+func (c *C) Cachable() bool {
+	return true
+}
+
 func (c *C) Build(bc targets.BuildContext) (interface{}, time.Time, error) {
 	fmt.Printf("C.Build()...\n")
 	e, _ := bc.GetDependency("e")
