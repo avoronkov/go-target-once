@@ -2,6 +2,7 @@ package builder
 
 import (
 	"sync"
+	"sync/atomic"
 	"time"
 
 	"github.com/avoronkov/go-target-once/lib/logger"
@@ -11,6 +12,9 @@ import (
 
 type BuildSession struct {
 	targetResults map[string]*ObservableResult
+
+	// Target ID -> bool
+	modifiedTargets sync.Map
 
 	globalCache warehouse.Warehouse
 }
@@ -45,7 +49,9 @@ T:
 				continue T
 			}
 			// check all subtargets are not modified
-			// TODO
+			if bc.targetOrDepsModified(id, tm, tgts, &bc.modifiedTargets) {
+				continue T
+			}
 
 			// If OK then put content into targetResults
 			bc.targetResults[id].Put(&buildResult{
@@ -133,6 +139,43 @@ func (bc *BuildSession) removeTargetWithDeps(id string, tgts *map[string]*target
 	if meta.refCounter == 0 {
 		delete(*tgts, id)
 	}
+}
+
+func (bc *BuildSession) targetOrDepsModified(id string, since time.Time, tgts map[string]*targetMeta, modified *sync.Map) bool {
+	var wg sync.WaitGroup
+	var tModified func(string)
+
+	var mod int32
+
+	tModified = func(tid string) {
+		defer wg.Done()
+
+		meta := tgts[tid]
+		wg.Add(len(meta.depsNames))
+		for _, depId := range meta.depsNames {
+			go tModified(depId)
+		}
+
+		if md, ok := modified.Load(tid); ok {
+			if md.(bool) {
+				atomic.StoreInt32(&mod, 1)
+			}
+			return
+		}
+
+		if mf, ok := meta.t.(targets.Modifiable); ok {
+			md := mf.IsModified(since)
+			modified.Store(tid, md)
+			if md {
+				atomic.StoreInt32(&mod, 1)
+			}
+		}
+	}
+
+	wg.Add(1)
+	go tModified(id)
+	wg.Wait()
+	return mod > 0
 }
 
 type buildResult struct {
