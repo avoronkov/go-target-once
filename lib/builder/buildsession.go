@@ -41,6 +41,8 @@ func (bc *BuildSession) Build(t targets.Target) (content interface{}, tm time.Ti
 	}
 
 	// Check cached targets
+	// TODO : handle KeepAlive targets
+	// TODO : handle locally cached targets
 T:
 	for id, meta := range tgts {
 		if ct, ok := meta.t.(targets.Cachable); ok && ct.Cachable() {
