@@ -19,23 +19,16 @@ func NewBuildSession() *BuildSession {
 }
 
 func (bc *BuildSession) Build(t targets.Target) (content interface{}, tm time.Time, err error) {
-	// targetId -> dependencies ids
-	targetDeps := map[string][]string{}
-	// targetId -> dep name -> dep id
-	targetDepsNames := map[string]map[string]string{}
+	tgts := map[string]*targetMeta{}
 
-	tgts := map[string]targets.Target{}
-
-	bc.fillTargetDeps(t, &targetDeps, &targetDepsNames, &tgts)
+	bc.fillTargetDeps(t, &tgts)
 
 	tid := t.TargetId()
 
-	logger.Debugf("[target=%v] targetDeps = %+v", tid, targetDeps)
-	logger.Debugf("[target=%v] targetDeps = %+v", tid, targetDepsNames)
 	logger.Debugf("[target=%v] targets (%v) = %+V", tid, len(tgts), tgts)
 
 	// Create observable results
-	for t := range targetDeps {
+	for t := range tgts {
 		bc.targetResults[t] = NewObservable()
 	}
 
@@ -44,10 +37,10 @@ func (bc *BuildSession) Build(t targets.Target) (content interface{}, tm time.Ti
 	wg.Add(len(tgts))
 
 	for id, tgt := range tgts {
-		go func(id string, tg targets.Target) {
+		go func(id string, meta targetMeta) {
 			logger.Debugf("Building target '%v'...", id)
-			sc := NewSessionContext(id, bc, targetDepsNames[id])
-			cont, tm, err := tg.Build(sc)
+			sc := NewSessionContext(id, bc, meta.depsNames)
+			cont, tm, err := meta.t.Build(sc)
 			br := &buildResult{
 				C: cont,
 				T: tm,
@@ -56,7 +49,7 @@ func (bc *BuildSession) Build(t targets.Target) (content interface{}, tm time.Ti
 			bc.targetResults[id].Put(br)
 			logger.Debugf("Building target '%v': done.", id)
 			wg.Done()
-		}(id, tgt)
+		}(id, *tgt)
 	}
 
 	wg.Wait()
@@ -66,28 +59,30 @@ func (bc *BuildSession) Build(t targets.Target) (content interface{}, tm time.Ti
 	return br.C, br.T, br.E
 }
 
-func (bc *BuildSession) fillTargetDeps(t targets.Target, td *map[string][]string, tdn *map[string]map[string]string, tgts *map[string]targets.Target) {
+func (bc *BuildSession) fillTargetDeps(t targets.Target, tgts *map[string]*targetMeta) {
 	tid := t.TargetId()
-	if _, ok := (*tgts)[tid]; ok {
+
+	if meta, ok := (*tgts)[tid]; ok {
+		meta.refCounter++
+
 		logger.Debugf("Target `%v` already defined. Skipping.", tid)
 		return
 	}
 
-	(*tgts)[tid] = t
+	meta := newTargetMeta()
+	meta.t = t
 
-	tdeps := []string{}
 	if withDeps, ok := t.(targets.WithDependencies); ok {
 		namesMp := map[string]string{}
 		for name, d := range withDeps.Dependencies() {
 			did := d.TargetId()
 			namesMp[name] = did
 
-			tdeps = append(tdeps, d.TargetId())
-			bc.fillTargetDeps(d, td, tdn, tgts)
+			bc.fillTargetDeps(d, tgts)
 		}
-		(*tdn)[tid] = namesMp
+		meta.depsNames = namesMp
 	}
-	(*td)[tid] = tdeps
+	(*tgts)[tid] = meta
 }
 
 type buildResult struct {
