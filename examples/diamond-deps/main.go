@@ -4,11 +4,14 @@ import (
 	"fmt"
 
 	"github.com/avoronkov/go-target-once/lib/builder"
+	"github.com/avoronkov/go-target-once/lib/warehouse"
 )
 
 func main() {
+	w := warehouse.NewMemoryWarehouse()
+
 	a := new(A)
-	b := builder.NewBuildSession()
+	b := builder.NewBuildSession(w)
 
 	cont, tm, err := b.Build(a)
 

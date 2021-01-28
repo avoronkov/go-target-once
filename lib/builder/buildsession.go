@@ -6,13 +6,16 @@ import (
 
 	"github.com/avoronkov/go-target-once/lib/logger"
 	"github.com/avoronkov/go-target-once/lib/targets"
+	"github.com/avoronkov/go-target-once/lib/warehouse"
 )
 
 type BuildSession struct {
 	targetResults map[string]*ObservableResult
+
+	globalCache warehouse.Warehouse
 }
 
-func NewBuildSession() *BuildSession {
+func NewBuildSession(globalCache warehouse.Warehouse) *BuildSession {
 	return &BuildSession{
 		targetResults: make(map[string]*ObservableResult),
 	}
@@ -54,6 +57,18 @@ func (bc *BuildSession) Build(t targets.Target) (content interface{}, tm time.Ti
 
 	wg.Wait()
 
+	// cache cachable targets
+	for id, tgt := range tgts {
+		if ct, ok := tgt.t.(targets.Cachable); ok && ct.Cachable() {
+			res := bc.targetResults[id].Get()
+			if res.E != nil {
+				continue
+			}
+			bc.globalCache.Put(id, res.C, res.T)
+		}
+	}
+
+	// return result
 	br := bc.targetResults[t.TargetId()].Get()
 
 	return br.C, br.T, br.E
