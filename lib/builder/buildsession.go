@@ -35,17 +35,20 @@ func (bc *BuildSession) Build(t targets.Target) (content interface{}, tm time.Ti
 
 	logger.Debugf("[target=%v] targets (%v) = %+V", tid, len(tgts), tgts)
 
-	// Create observable results
-	for t := range tgts {
-		bc.targetResults[t] = NewObservable()
-	}
-
 	// Check cached targets
 	// TODO : handle KeepAlive targets
 	// TODO : handle locally cached targets
 T:
 	for id, meta := range tgts {
+		// check local cache
+		if _, ok := bc.targetResults[id]; ok {
+			// no need to build the target
+			bc.removeTargetWithDeps(id, &tgts)
+			continue T
+		}
+
 		if ct, ok := meta.t.(targets.Cachable); ok && ct.Cachable() {
+			// check global cache
 			cont, tm, ok := bc.globalCache.Get(id)
 			if !ok {
 				continue T
@@ -56,6 +59,7 @@ T:
 			}
 
 			// If OK then put content into targetResults
+			bc.targetResults[id] = NewObservable()
 			bc.targetResults[id].Put(&buildResult{
 				C: cont,
 				T: tm,
@@ -63,6 +67,11 @@ T:
 			// and remove target and subtargets from tgts
 			bc.removeTargetWithDeps(id, &tgts)
 		}
+	}
+
+	// Create observable results
+	for t := range tgts {
+		bc.targetResults[t] = NewObservable()
 	}
 
 	// Build
