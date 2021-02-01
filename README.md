@@ -119,3 +119,10 @@ Build with `go build -tags=debug` to enable debug logging.
 - Improve resolving "diamond" dependencies.
 - Build methods should return time.Time.
 - Add methods "IsModified" and "BuildIfModified" to support handling "If-Modified-Since" HTTP header.
+
+### Refactorings
+
+Cachable -> Cacheable
+TargetId -> TargetID
+ResultOk -> OK
+ResultFailed -> Failed
