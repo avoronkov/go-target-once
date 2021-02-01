@@ -59,9 +59,11 @@ T:
 			if !ok {
 				continue T
 			}
-			// check all subtargets are not modified
-			if bc.targetOrDepsModified(id, tm, tgts, &bc.modifiedTargets) {
-				continue T
+			if _, keepAlive := meta.t.(targets.KeepingAlive); !keepAlive {
+				// check all subtargets are not modified
+				if bc.targetOrDepsModified(id, tm, tgts, &bc.modifiedTargets) {
+					continue T
+				}
 			}
 
 			// If OK then put content into targetResults

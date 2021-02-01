@@ -30,13 +30,13 @@ func (t *TestTarget) Dependencies() map[string]targets.Target {
 	}
 }
 
-func (t *TestTarget) Build(bc targets.BuildContext) (interface{}, time.Time, error) {
-	dep, err := bc.GetDependency("dep")
-	if err != nil {
-		return nil, time.Time{}, err
+func (t *TestTarget) Build(bc targets.BuildContext) targets.Result {
+	dep := bc.GetDependency("dep")
+	if dep.Err != nil {
+		return targets.ResultFailed(dep.Err)
 	}
 	fmt.Println("Target: Build()")
-	return fmt.Sprintf("Target result: %v", dep), time.Now(), nil
+	return targets.ResultOk(fmt.Sprintf("Target result: %v", dep.Content))
 }
 
 // TestDependency
@@ -50,9 +50,9 @@ func (d *TestDependency) TargetId() string {
 	return "test-dependency"
 }
 
-func (d *TestDependency) Build(bc targets.BuildContext) (interface{}, time.Time, error) {
+func (d *TestDependency) Build(bc targets.BuildContext) targets.Result {
 	fmt.Println("Dependency: Build()")
-	return "Dependency result", time.Now(), nil
+	return targets.ResultOk("Dependency result")
 }
 
 func (d *TestDependency) IsModified(since time.Time) bool {
@@ -63,12 +63,12 @@ func (d *TestDependency) IsModified(since time.Time) bool {
 
 func ExampleKeepAlive() {
 	t1 := targets.KeepAlive(&TestTarget{}, 1*time.Minute)
-	result, _, err := builder.Build(t1)
-	fmt.Printf("Built (1): %v (%v)\n", result, err)
+	res := builder.Build(t1)
+	fmt.Printf("Built (1): %v (%v)\n", res.Content, res.Err)
 
 	t2 := targets.KeepAlive(&TestTarget{}, 1*time.Minute)
-	result, _, err = builder.Build(t2)
-	fmt.Printf("Built (2): %v (%v)\n", result, err)
+	res = builder.Build(t2)
+	fmt.Printf("Built (2): %v (%v)\n", res.Content, res.Err)
 	// Output:
 	// Dependency: Build()
 	// Target: Build()
