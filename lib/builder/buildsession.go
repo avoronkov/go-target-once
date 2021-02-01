@@ -1,6 +1,7 @@
 package builder
 
 import (
+	"fmt"
 	"sync"
 	"sync/atomic"
 	"time"
@@ -11,18 +12,20 @@ import (
 )
 
 type BuildSession struct {
-	targetResults map[string]*ObservableResult
+	// Target ID -> *ObservableResult
+	targetResults sync.Map
 
 	// Target ID -> bool
 	modifiedTargets sync.Map
 
 	globalCache warehouse.Warehouse
+
+	mutex sync.Mutex
 }
 
 func NewBuildSession(globalCache warehouse.Warehouse) *BuildSession {
 	return &BuildSession{
-		targetResults: make(map[string]*ObservableResult),
-		globalCache:   globalCache,
+		globalCache: globalCache,
 	}
 }
 
@@ -35,13 +38,16 @@ func (bc *BuildSession) Build(t targets.Target) (content interface{}, tm time.Ti
 
 	logger.Debugf("[target=%v] targets (%v) = %+V", tid, len(tgts), tgts)
 
+	// sync access to bc.targetResults
+	bc.mutex.Lock()
+
 	// Check cached targets
 	// TODO : handle KeepAlive targets
 	// TODO : handle locally cached targets
 T:
 	for id, meta := range tgts {
 		// check local cache
-		if _, ok := bc.targetResults[id]; ok {
+		if _, ok := bc.targetResults.Load(id); ok {
 			// no need to build the target
 			bc.removeTargetWithDeps(id, &tgts)
 			continue T
@@ -59,11 +65,13 @@ T:
 			}
 
 			// If OK then put content into targetResults
-			bc.targetResults[id] = NewObservable()
-			bc.targetResults[id].Put(&buildResult{
+			obs := NewObservable()
+			obs.Put(&buildResult{
 				C: cont,
 				T: tm,
 			})
+			bc.targetResults.Store(id, obs)
+
 			// and remove target and subtargets from tgts
 			bc.removeTargetWithDeps(id, &tgts)
 		}
@@ -71,8 +79,10 @@ T:
 
 	// Create observable results
 	for t := range tgts {
-		bc.targetResults[t] = NewObservable()
+		bc.targetResults.Store(t, NewObservable())
 	}
+
+	bc.mutex.Unlock()
 
 	// Build
 	var wg sync.WaitGroup
@@ -88,7 +98,11 @@ T:
 				T: tm,
 				E: err,
 			}
-			bc.targetResults[id].Put(br)
+			o, ok := bc.targetResults.Load(id)
+			if !ok {
+				panic(fmt.Errorf("Target with ID `%v` not found in targetResults", id))
+			}
+			o.(*ObservableResult).Put(br)
 			logger.Debugf("Building target '%v': done.", id)
 			wg.Done()
 		}(id, *tgt)
@@ -99,7 +113,11 @@ T:
 	// cache cachable targets
 	for id, tgt := range tgts {
 		if ct, ok := tgt.t.(targets.Cachable); ok && ct.Cachable() {
-			res := bc.targetResults[id].Get()
+			o, ok := bc.targetResults.Load(id)
+			if !ok {
+				panic(fmt.Errorf("Target with ID `%v` not found in targetResults", id))
+			}
+			res := o.(*ObservableResult).Get()
 			if res.E != nil {
 				continue
 			}
@@ -108,7 +126,11 @@ T:
 	}
 
 	// return result
-	br := bc.targetResults[t.TargetId()].Get()
+	o, ok := bc.targetResults.Load(t.TargetId())
+	if !ok {
+		panic(fmt.Errorf("Target with ID `%v` not found in targetResults", t.TargetId()))
+	}
+	br := o.(*ObservableResult).Get()
 
 	return br.C, br.T, br.E
 }
