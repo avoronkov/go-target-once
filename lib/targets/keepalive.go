@@ -33,10 +33,8 @@ func (k *keepAlive) Dependencies() map[string]Target {
 	}
 }
 
-func (k *keepAlive) Build(bc BuildContext) (interface{}, time.Time, error) {
-	content, err := bc.GetDependency("target")
-	// Fix Build() interface
-	return content, time.Now(), err
+func (k *keepAlive) Build(bc BuildContext) Result {
+	return bc.GetDependency("target")
 }
 
 func (k *keepAlive) ValidFor() time.Duration {

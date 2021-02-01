@@ -21,14 +21,14 @@ func (a *A) Dependencies() map[string]targets.Target {
 	}
 }
 
-func (a *A) Build(bc targets.BuildContext) (interface{}, time.Time, error) {
+func (a *A) Build(bc targets.BuildContext) targets.Result {
 	fmt.Printf("A.Build()...\n")
-	b, _ := bc.GetDependency("b")
-	c, _ := bc.GetDependency("c")
-	content := fmt.Sprintf("A (%v, %v)", b, c)
+	b := bc.GetDependency("b")
+	c := bc.GetDependency("c")
+	content := fmt.Sprintf("A (%v, %v)", b.Content, c.Content)
 	time.Sleep(1 * time.Second)
 	fmt.Printf("A.Build(): done.\n")
-	return content, time.Now(), nil
+	return targets.ResultOk(content)
 }
 
 type B struct {
@@ -45,14 +45,14 @@ func (b *B) Dependencies() map[string]targets.Target {
 	}
 }
 
-func (b *B) Build(bc targets.BuildContext) (interface{}, time.Time, error) {
+func (b *B) Build(bc targets.BuildContext) targets.Result {
 	fmt.Printf("B.Build()...\n")
-	d, _ := bc.GetDependency("d")
-	e, _ := bc.GetDependency("e")
-	content := fmt.Sprintf("B (%v, %v)", d, e)
+	d := bc.GetDependency("d")
+	e := bc.GetDependency("e")
+	content := fmt.Sprintf("B (%v, %v)", d.Content, e.Content)
 	time.Sleep(1 * time.Second)
 	fmt.Printf("B.Build(): done.\n")
-	return content, time.Now(), nil
+	return targets.ResultOk(content)
 }
 
 type C struct {
@@ -73,14 +73,14 @@ func (c *C) Cachable() bool {
 	return true
 }
 
-func (c *C) Build(bc targets.BuildContext) (interface{}, time.Time, error) {
+func (c *C) Build(bc targets.BuildContext) targets.Result {
 	fmt.Printf("C.Build()...\n")
-	e, _ := bc.GetDependency("e")
-	f, _ := bc.GetDependency("f")
-	content := fmt.Sprintf("C (%v, %v)", e, f)
+	e := bc.GetDependency("e")
+	f := bc.GetDependency("f")
+	content := fmt.Sprintf("C (%v, %v)", e.Content, f.Content)
 	time.Sleep(1 * time.Second)
 	fmt.Printf("C.Build():u done.\n")
-	return content, time.Now(), nil
+	return targets.ResultOk(content)
 }
 
 type D struct {
@@ -90,10 +90,10 @@ func (d *D) TargetId() string {
 	return "target-D"
 }
 
-func (d *D) Build(bc targets.BuildContext) (interface{}, time.Time, error) {
+func (d *D) Build(bc targets.BuildContext) targets.Result {
 	fmt.Printf("D.Build()\n")
 	time.Sleep(1 * time.Second)
-	return "{D}", time.Now(), nil
+	return targets.ResultOk("{D}")
 }
 
 type E struct {
@@ -103,10 +103,10 @@ func (e *E) TargetId() string {
 	return "target-E"
 }
 
-func (e *E) Build(bc targets.BuildContext) (interface{}, time.Time, error) {
+func (e *E) Build(bc targets.BuildContext) targets.Result {
 	fmt.Printf("E.Build()\n")
 	time.Sleep(1 * time.Second)
-	return "{E}", time.Now(), nil
+	return targets.ResultOk("{E}")
 }
 
 type F struct {
@@ -116,8 +116,8 @@ func (f *F) TargetId() string {
 	return "target-F"
 }
 
-func (f *F) Build(bc targets.BuildContext) (interface{}, time.Time, error) {
+func (f *F) Build(bc targets.BuildContext) targets.Result {
 	fmt.Printf("F.Build()\n")
 	time.Sleep(1 * time.Second)
-	return "{F}", time.Now(), nil
+	return targets.ResultOk("{F}")
 }

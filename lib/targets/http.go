@@ -25,17 +25,15 @@ func (u *Url) TargetId() string {
 	return u.url
 }
 
-func (u *Url) Build(bc BuildContext) (content interface{}, t time.Time, e error) {
+func (u *Url) Build(bc BuildContext) Result {
 	resp, err := http.Get(u.url)
 	if err != nil {
-		e = err
-		return
+		return ResultFailed(err)
 	}
 	defer resp.Body.Close()
 	data, err := ioutil.ReadAll(resp.Body)
 	if err != nil {
-		e = err
-		return
+		return ResultFailed(err)
 	}
 
 	lastMdf, ok := lastModified(resp)
@@ -43,7 +41,7 @@ func (u *Url) Build(bc BuildContext) (content interface{}, t time.Time, e error)
 		lastMdf = time.Now()
 	}
 
-	return data, lastMdf, nil
+	return ResultOkTime(data, lastMdf)
 }
 
 var lastModifiedFmt = time.RFC1123

@@ -13,9 +13,9 @@ func main() {
 	w := warehouse.NewMemoryWarehouse()
 	bs := builder.NewBuildSession(w)
 
-	cont, tm, err := bs.Build(a)
+	res := bs.Build(a)
 
-	fmt.Printf("A -> %v\n", cont)
-	fmt.Printf("time: %v\n", tm)
-	fmt.Printf("err: %v\n", err)
+	fmt.Printf("A -> %v\n", res.Content)
+	fmt.Printf("time: %v\n", res.Time)
+	fmt.Printf("err: %v\n", res.Err)
 }

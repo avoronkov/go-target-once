@@ -7,7 +7,7 @@ import (
 type Target interface {
 	TargetId() string
 
-	Build(bc BuildContext) (interface{}, time.Time, error)
+	Build(bc BuildContext) Result
 }
 
 type WithDependencies interface {

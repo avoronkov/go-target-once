@@ -25,26 +25,24 @@ func (f *File) TargetId() string {
 	return f.path
 }
 
-func (f *File) Build(bc BuildContext) (content interface{}, t time.Time, e error) {
+// Content = []byte
+func (f *File) Build(bc BuildContext) Result {
 	file, err := os.Open(f.path)
 	if err != nil {
-		e = err
-		return
+		return ResultFailed(err)
 	}
 
 	fi, err := file.Stat()
 	if err != nil {
-		e = err
-		return
+		return ResultFailed(err)
 	}
 
-	content, err = ioutil.ReadAll(file)
+	content, err := ioutil.ReadAll(file)
 	if err != nil {
-		e = err
-		return
+		return ResultFailed(err)
 	}
 
-	return content, fi.ModTime(), nil
+	return ResultOkTime(content, fi.ModTime())
 }
 
 func (f *File) IsModified(since time.Time) bool {

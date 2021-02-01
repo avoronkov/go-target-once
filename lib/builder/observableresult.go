@@ -1,20 +1,24 @@
 package builder
 
-import "sync"
+import (
+	"sync"
+
+	"github.com/avoronkov/go-target-once/lib/targets"
+)
 
 type ObservableResult struct {
-	data  *buildResult
+	data  *targets.Result
 	ready bool
 	mutex sync.Mutex
 
-	observers []chan *buildResult
+	observers []chan *targets.Result
 }
 
 func NewObservable() *ObservableResult {
 	return &ObservableResult{}
 }
 
-func (o *ObservableResult) Put(data *buildResult) {
+func (o *ObservableResult) Put(data *targets.Result) {
 	o.mutex.Lock()
 	defer o.mutex.Unlock()
 
@@ -25,10 +29,10 @@ func (o *ObservableResult) Put(data *buildResult) {
 		observer <- data
 		close(observer)
 	}
-	o.observers = []chan *buildResult{}
+	o.observers = []chan *targets.Result{}
 }
 
-func (o *ObservableResult) Get() *buildResult {
+func (o *ObservableResult) Get() *targets.Result {
 	o.mutex.Lock()
 
 	if o.ready {
@@ -37,7 +41,7 @@ func (o *ObservableResult) Get() *buildResult {
 	}
 
 	// wait for data is ready
-	ch := make(chan *buildResult)
+	ch := make(chan *targets.Result)
 	o.observers = append(o.observers, ch)
 	o.mutex.Unlock()
 

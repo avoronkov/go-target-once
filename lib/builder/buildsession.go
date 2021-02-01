@@ -29,7 +29,7 @@ func NewBuildSession(globalCache warehouse.Warehouse) *BuildSession {
 	}
 }
 
-func (bc *BuildSession) Build(t targets.Target) (content interface{}, tm time.Time, err error) {
+func (bc *BuildSession) Build(t targets.Target) targets.Result {
 	tgts := map[string]*targetMeta{}
 
 	bc.fillTargetDeps(t, &tgts)
@@ -66,9 +66,9 @@ T:
 
 			// If OK then put content into targetResults
 			obs := NewObservable()
-			obs.Put(&buildResult{
-				C: cont,
-				T: tm,
+			obs.Put(&targets.Result{
+				Content: cont,
+				Time:    tm,
 			})
 			bc.targetResults.Store(id, obs)
 
@@ -92,17 +92,12 @@ T:
 		go func(id string, meta targetMeta) {
 			logger.Debugf("Building target '%v'...", id)
 			sc := NewSessionContext(id, bc, meta.depsNames)
-			cont, tm, err := meta.t.Build(sc)
-			br := &buildResult{
-				C: cont,
-				T: tm,
-				E: err,
-			}
+			result := meta.t.Build(sc)
 			o, ok := bc.targetResults.Load(id)
 			if !ok {
 				panic(fmt.Errorf("Target with ID `%v` not found in targetResults", id))
 			}
-			o.(*ObservableResult).Put(br)
+			o.(*ObservableResult).Put(&result)
 			logger.Debugf("Building target '%v': done.", id)
 			wg.Done()
 		}(id, *tgt)
@@ -118,10 +113,10 @@ T:
 				panic(fmt.Errorf("Target with ID `%v` not found in targetResults", id))
 			}
 			res := o.(*ObservableResult).Get()
-			if res.E != nil {
+			if res.Err != nil {
 				continue
 			}
-			bc.globalCache.Put(id, res.C, res.T)
+			bc.globalCache.Put(id, res.Content, res.Time)
 		}
 	}
 
@@ -132,7 +127,17 @@ T:
 	}
 	br := o.(*ObservableResult).Get()
 
-	return br.C, br.T, br.E
+	return *br
+}
+
+func (bc *BuildSession) Builds(ts ...targets.Target) []targets.Result {
+	mt := newMultiTarget(ts)
+	result := bc.Build(mt)
+	if result.Err != nil {
+		panic(fmt.Errorf("Internal error: multiTarget Build() failed: %v", result.Err))
+	}
+	results := result.Content.([]targets.Result)
+	return results
 }
 
 func (bc *BuildSession) fillTargetDeps(t targets.Target, tgts *map[string]*targetMeta) {
@@ -209,10 +214,4 @@ func (bc *BuildSession) targetOrDepsModified(id string, since time.Time, tgts ma
 	go tModified(id)
 	wg.Wait()
 	return mod > 0
-}
-
-type buildResult struct {
-	C interface{}
-	T time.Time
-	E error
 }

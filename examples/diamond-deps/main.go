@@ -14,21 +14,21 @@ func main() {
 		a := new(A)
 		b := builder.NewBuildSession(w)
 
-		cont, tm, err := b.Build(a)
+		res := b.Build(a)
 
-		fmt.Printf("A -> %v\n", cont)
-		fmt.Printf("time: %v\n", tm)
-		fmt.Printf("err: %v\n", err)
+		fmt.Printf("A -> %v\n", res.Content)
+		fmt.Printf("time: %v\n", res.Time)
+		fmt.Printf("err: %v\n", res.Err)
 	}()
 
 	func() {
 		a := new(A)
 		b := builder.NewBuildSession(w)
 
-		cont, tm, err := b.Build(a)
+		res := b.Build(a)
 
-		fmt.Printf("A -> %v\n", cont)
-		fmt.Printf("time: %v\n", tm)
-		fmt.Printf("err: %v\n", err)
+		fmt.Printf("A -> %v\n", res.Content)
+		fmt.Printf("time: %v\n", res.Time)
+		fmt.Printf("err: %v\n", res.Err)
 	}()
 }

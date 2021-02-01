@@ -1,8 +1,6 @@
 package builder
 
 import (
-	"time"
-
 	"github.com/avoronkov/go-target-once/lib/targets"
 )
 
@@ -24,24 +22,23 @@ func NewSessionContext(targetId string, bs *BuildSession, depNames map[string]st
 	}
 }
 
-func (sc *SessionContext) GetDependency(name string) (interface{}, error) {
+func (sc *SessionContext) GetDependency(name string) targets.Result {
 	depId, ok := sc.depNames[name]
 	if !ok {
-		return nil, NewDependencyNotFound(name)
+		return targets.ResultFailed(NewDependencyNotFound(name))
 	}
 	o, ok := sc.buildSession.targetResults.Load(depId)
 	if !ok {
-		return nil, NewDependencyNotFound(name)
+		return targets.ResultFailed(NewDependencyNotFound(name))
 	}
 	br := o.(*ObservableResult).Get()
-	return br.C, br.E
+	return *br
 }
 
-func (sc *SessionContext) Build(t targets.Target) (interface{}, time.Time, error) {
+func (sc *SessionContext) Build(t targets.Target) targets.Result {
 	return sc.buildSession.Build(t)
 }
 
-func (sc *SessionContext) Builds(t ...targets.Target) ([]interface{}, []time.Time, []error) {
-	// TODO
-	return nil, nil, nil
+func (sc *SessionContext) Builds(t ...targets.Target) []targets.Result {
+	return sc.buildSession.Builds(t...)
 }

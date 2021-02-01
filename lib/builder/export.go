@@ -1,18 +1,18 @@
 package builder
 
 import (
-	"time"
-
 	"github.com/avoronkov/go-target-once/lib/targets"
 	"github.com/avoronkov/go-target-once/lib/warehouse"
 )
 
-var Default *Builder = New(warehouse.NewMemoryWarehouse())
+var DefaultWarehouse warehouse.Warehouse = warehouse.NewMemoryWarehouse()
 
-func Build(t targets.Target) (interface{}, time.Time, error) {
-	return Default.Build(t)
+func Build(t targets.Target) targets.Result {
+	bs := NewBuildSession(DefaultWarehouse)
+	return bs.Build(t)
 }
 
-func Builds(ts ...targets.Target) ([]interface{}, []time.Time, []error) {
-	return Default.Builds(ts...)
+func Builds(ts ...targets.Target) []targets.Result {
+	bs := NewBuildSession(DefaultWarehouse)
+	return bs.Builds(ts...)
 }
