@@ -2,6 +2,7 @@ package main
 
 import (
 	"fmt"
+	"strings"
 
 	"github.com/avoronkov/go-target-once/lib/builder"
 	"github.com/avoronkov/go-target-once/lib/warehouse"
@@ -19,6 +20,8 @@ func main() {
 		fmt.Printf("A -> %v\n", res.Content)
 		fmt.Printf("time: %v\n", res.Time)
 		fmt.Printf("err: %v\n", res.Err)
+
+		fmt.Printf("Targets built: %v\n", strings.Join(b.BuiltTargets(), ", "))
 	}()
 
 	func() {
@@ -30,5 +33,7 @@ func main() {
 		fmt.Printf("A -> %v\n", res.Content)
 		fmt.Printf("time: %v\n", res.Time)
 		fmt.Printf("err: %v\n", res.Err)
+
+		fmt.Printf("Targets built: %v\n", strings.Join(b.BuiltTargets(), ", "))
 	}()
 }

@@ -2,6 +2,7 @@ package builder
 
 import (
 	"fmt"
+	"sort"
 	"sync"
 	"sync/atomic"
 	"time"
@@ -21,6 +22,9 @@ type BuildSession struct {
 	globalCache warehouse.Warehouse
 
 	mutex sync.Mutex
+
+	// Target ID -> struct{}
+	builtTargets sync.Map
 }
 
 func NewBuildSession(globalCache warehouse.Warehouse) *BuildSession {
@@ -122,6 +126,8 @@ T:
 		}
 	}
 
+	bc.updateBuiltTargets(tgts)
+
 	// return result
 	o, ok := bc.targetResults.Load(t.TargetID())
 	if !ok {
@@ -216,4 +222,19 @@ func (bc *BuildSession) targetOrDepsModified(id string, since time.Time, tgts ma
 	go tModified(id)
 	wg.Wait()
 	return mod > 0
+}
+
+func (bc *BuildSession) updateBuiltTargets(tgts map[string]*targetMeta) {
+	for id := range tgts {
+		bc.builtTargets.Store(id, struct{}{})
+	}
+}
+
+func (bc *BuildSession) BuiltTargets() (ts []string) {
+	bc.builtTargets.Range(func(key, value interface{}) bool {
+		ts = append(ts, key.(string))
+		return true
+	})
+	sort.Strings(ts)
+	return ts
 }
