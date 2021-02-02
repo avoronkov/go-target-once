@@ -16,7 +16,7 @@ var _ targets.Target = (*TestTarget)(nil)
 var _ targets.WithDependencies = (*TestTarget)(nil)
 var _ targets.Modifiable = (*TestTarget)(nil)
 
-func (t *TestTarget) TargetId() string {
+func (t *TestTarget) TargetID() string {
 	return "test-target"
 }
 
@@ -33,10 +33,10 @@ func (t *TestTarget) Dependencies() map[string]targets.Target {
 func (t *TestTarget) Build(bc targets.BuildContext) targets.Result {
 	dep := bc.GetDependency("dep")
 	if dep.Err != nil {
-		return targets.ResultFailed(dep.Err)
+		return targets.Failed(dep.Err)
 	}
 	fmt.Println("Target: Build()")
-	return targets.ResultOk(fmt.Sprintf("Target result: %v", dep.Content))
+	return targets.OK(fmt.Sprintf("Target result: %v", dep.Content))
 }
 
 // TestDependency
@@ -46,13 +46,13 @@ type TestDependency struct{}
 var _ targets.Target = (*TestDependency)(nil)
 var _ targets.Modifiable = (*TestDependency)(nil)
 
-func (d *TestDependency) TargetId() string {
+func (d *TestDependency) TargetID() string {
 	return "test-dependency"
 }
 
 func (d *TestDependency) Build(bc targets.BuildContext) targets.Result {
 	fmt.Println("Dependency: Build()")
-	return targets.ResultOk("Dependency result")
+	return targets.OK("Dependency result")
 }
 
 func (d *TestDependency) IsModified(since time.Time) bool {

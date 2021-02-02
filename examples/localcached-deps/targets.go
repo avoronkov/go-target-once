@@ -13,7 +13,7 @@ type A struct {
 
 var _ targets.Target = (*A)(nil)
 
-func (a *A) TargetId() string {
+func (a *A) TargetID() string {
 	return "target-A"
 }
 
@@ -29,7 +29,7 @@ func (a *A) Build(bc targets.BuildContext) targets.Result {
 	log.Printf("A: GetDependency(dep-b)")
 	b := bc.GetDependency("dep-b")
 	if b.Err != nil {
-		return targets.ResultFailed(b.Err)
+		return targets.Failed(b.Err)
 	}
 
 	time.Sleep(1 * time.Second)
@@ -38,17 +38,17 @@ func (a *A) Build(bc targets.BuildContext) targets.Result {
 	targetC := new(C)
 	c := bc.Build(targetC)
 	if c.Err != nil {
-		return targets.ResultFailed(c.Err)
+		return targets.Failed(c.Err)
 	}
 
-	return targets.ResultOk(fmt.Sprintf("A{B: %v, C: %v}", b.Content, c.Content))
+	return targets.OK(fmt.Sprintf("A{B: %v, C: %v}", b.Content, c.Content))
 }
 
 type B struct{}
 
 var _ targets.Target = (*B)(nil)
 
-func (a *B) TargetId() string {
+func (a *B) TargetID() string {
 	return "target-B"
 }
 
@@ -57,20 +57,20 @@ func (a *B) Build(bc targets.BuildContext) targets.Result {
 	targetC := new(C)
 	c := bc.Build(targetC)
 	if c.Err != nil {
-		return targets.ResultFailed(c.Err)
+		return targets.Failed(c.Err)
 	}
-	return targets.ResultOk(fmt.Sprintf("B{C: %v}", c.Content))
+	return targets.OK(fmt.Sprintf("B{C: %v}", c.Content))
 }
 
 type C struct{}
 
 var _ targets.Target = (*C)(nil)
 
-func (a *C) TargetId() string {
+func (a *C) TargetID() string {
 	return "target-C"
 }
 
 func (a *C) Build(bc targets.BuildContext) targets.Result {
 	log.Printf("C.Build()")
-	return targets.ResultOk("{C}")
+	return targets.OK("{C}")
 }

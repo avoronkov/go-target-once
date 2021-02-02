@@ -8,21 +8,21 @@ type Result struct {
 	Err     error
 }
 
-func ResultOk(content interface{}) Result {
+func OK(content interface{}) Result {
 	return Result{
 		Content: content,
 		Time:    time.Now(),
 	}
 }
 
-func ResultOkTime(content interface{}, tm time.Time) Result {
+func OKTime(content interface{}, tm time.Time) Result {
 	return Result{
 		Content: content,
 		Time:    tm,
 	}
 }
 
-func ResultFailed(err error) Result {
+func Failed(err error) Result {
 	return Result{
 		Err: err,
 	}

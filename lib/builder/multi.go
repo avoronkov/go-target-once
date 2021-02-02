@@ -24,7 +24,7 @@ func newMultiTarget(ts []targets.Target) *multiTarget {
 		if i > 0 {
 			fmt.Fprintf(id, ",")
 		}
-		fmt.Fprintf(id, t.TargetId())
+		fmt.Fprintf(id, t.TargetID())
 		deps[strconv.Itoa(i)] = t
 	}
 	return &multiTarget{
@@ -33,7 +33,7 @@ func newMultiTarget(ts []targets.Target) *multiTarget {
 	}
 }
 
-func (t *multiTarget) TargetId() string {
+func (t *multiTarget) TargetID() string {
 	return t.id
 }
 
@@ -49,5 +49,5 @@ func (t *multiTarget) Build(bc targets.BuildContext) targets.Result {
 		d := bc.GetDependency(strconv.Itoa(i))
 		results = append(results, d)
 	}
-	return targets.ResultOk(results)
+	return targets.OK(results)
 }

@@ -14,7 +14,7 @@ type ID struct {
 	id string
 }
 
-func (i *ID) InitTargetId() {
+func (i *ID) InitTargetID() {
 	_, file, line, ok := runtime.Caller(1)
 	if !ok {
 		panic(errors.New("Cannot fetch stack frame."))
@@ -22,9 +22,9 @@ func (i *ID) InitTargetId() {
 	i.id = fmt.Sprintf("id:%v:%v", file, line)
 }
 
-func (i *ID) TargetId() string {
+func (i *ID) TargetID() string {
 	if i.id == "" {
-		panic(errors.New("InitTargetId is not called"))
+		panic(errors.New("InitTargetID is not called"))
 	}
 	return i.id
 }
@@ -38,11 +38,11 @@ func (Mutable) IsModified(since time.Time) bool {
 	return true
 }
 
-// Cachable
-type Cachable struct{}
+// Cacheable
+type Cacheable struct{}
 
-var _ targets.Cachable = Cachable{}
+var _ targets.Cacheable = Cacheable{}
 
-func (Cachable) Cachable() bool {
+func (Cacheable) Cacheable() bool {
 	return true
 }

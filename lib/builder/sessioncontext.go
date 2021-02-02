@@ -25,11 +25,11 @@ func NewSessionContext(targetId string, bs *BuildSession, depNames map[string]st
 func (sc *SessionContext) GetDependency(name string) targets.Result {
 	depId, ok := sc.depNames[name]
 	if !ok {
-		return targets.ResultFailed(NewDependencyNotFound(name))
+		return targets.Failed(NewDependencyNotFound(name))
 	}
 	o, ok := sc.buildSession.targetResults.Load(depId)
 	if !ok {
-		return targets.ResultFailed(NewDependencyNotFound(name))
+		return targets.Failed(NewDependencyNotFound(name))
 	}
 	br := o.(*ObservableResult).Get()
 	return *br

@@ -10,7 +10,7 @@ import (
 type A struct {
 }
 
-func (a *A) TargetId() string {
+func (a *A) TargetID() string {
 	return "target-A"
 }
 
@@ -28,13 +28,13 @@ func (a *A) Build(bc targets.BuildContext) targets.Result {
 	content := fmt.Sprintf("A (%v, %v)", b.Content, c.Content)
 	time.Sleep(1 * time.Second)
 	fmt.Printf("A.Build(): done.\n")
-	return targets.ResultOk(content)
+	return targets.OK(content)
 }
 
 type B struct {
 }
 
-func (b *B) TargetId() string {
+func (b *B) TargetID() string {
 	return "target-B"
 }
 
@@ -52,13 +52,13 @@ func (b *B) Build(bc targets.BuildContext) targets.Result {
 	content := fmt.Sprintf("B (%v, %v)", d.Content, e.Content)
 	time.Sleep(1 * time.Second)
 	fmt.Printf("B.Build(): done.\n")
-	return targets.ResultOk(content)
+	return targets.OK(content)
 }
 
 type C struct {
 }
 
-func (c *C) TargetId() string {
+func (c *C) TargetID() string {
 	return "target-C"
 }
 
@@ -69,7 +69,7 @@ func (c *C) Dependencies() map[string]targets.Target {
 	}
 }
 
-func (c *C) Cachable() bool {
+func (c *C) Cacheable() bool {
 	return true
 }
 
@@ -80,44 +80,44 @@ func (c *C) Build(bc targets.BuildContext) targets.Result {
 	content := fmt.Sprintf("C (%v, %v)", e.Content, f.Content)
 	time.Sleep(1 * time.Second)
 	fmt.Printf("C.Build():u done.\n")
-	return targets.ResultOk(content)
+	return targets.OK(content)
 }
 
 type D struct {
 }
 
-func (d *D) TargetId() string {
+func (d *D) TargetID() string {
 	return "target-D"
 }
 
 func (d *D) Build(bc targets.BuildContext) targets.Result {
 	fmt.Printf("D.Build()\n")
 	time.Sleep(1 * time.Second)
-	return targets.ResultOk("{D}")
+	return targets.OK("{D}")
 }
 
 type E struct {
 }
 
-func (e *E) TargetId() string {
+func (e *E) TargetID() string {
 	return "target-E"
 }
 
 func (e *E) Build(bc targets.BuildContext) targets.Result {
 	fmt.Printf("E.Build()\n")
 	time.Sleep(1 * time.Second)
-	return targets.ResultOk("{E}")
+	return targets.OK("{E}")
 }
 
 type F struct {
 }
 
-func (f *F) TargetId() string {
+func (f *F) TargetID() string {
 	return "target-F"
 }
 
 func (f *F) Build(bc targets.BuildContext) targets.Result {
 	fmt.Printf("F.Build()\n")
 	time.Sleep(1 * time.Second)
-	return targets.ResultOk("{F}")
+	return targets.OK("{F}")
 }

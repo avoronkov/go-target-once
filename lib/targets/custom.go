@@ -19,7 +19,7 @@ type Custom struct {
 
 var _ Target = (*Custom)(nil)
 
-func (c *Custom) TargetId() string {
+func (c *Custom) TargetID() string {
 	if c.Id == "" {
 		panic(fmt.Errorf("Custom.Id is not defined"))
 	}

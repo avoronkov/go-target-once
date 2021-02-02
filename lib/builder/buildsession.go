@@ -34,7 +34,7 @@ func (bc *BuildSession) Build(t targets.Target) targets.Result {
 
 	bc.fillTargetDeps(t, &tgts)
 
-	tid := t.TargetId()
+	tid := t.TargetID()
 
 	logger.Debugf("[target=%v] targets (%v) = %+V", tid, len(tgts), tgts)
 
@@ -53,7 +53,7 @@ T:
 			continue T
 		}
 
-		if ct, ok := meta.t.(targets.Cachable); ok && ct.Cachable() {
+		if ct, ok := meta.t.(targets.Cacheable); ok && ct.Cacheable() {
 			// check global cache
 			cont, tm, ok := bc.globalCache.Get(id)
 			if !ok {
@@ -107,9 +107,9 @@ T:
 
 	wg.Wait()
 
-	// cache cachable targets
+	// cache Cacheable targets
 	for id, tgt := range tgts {
-		if ct, ok := tgt.t.(targets.Cachable); ok && ct.Cachable() {
+		if ct, ok := tgt.t.(targets.Cacheable); ok && ct.Cacheable() {
 			o, ok := bc.targetResults.Load(id)
 			if !ok {
 				panic(fmt.Errorf("Target with ID `%v` not found in targetResults", id))
@@ -123,9 +123,9 @@ T:
 	}
 
 	// return result
-	o, ok := bc.targetResults.Load(t.TargetId())
+	o, ok := bc.targetResults.Load(t.TargetID())
 	if !ok {
-		panic(fmt.Errorf("Target with ID `%v` not found in targetResults", t.TargetId()))
+		panic(fmt.Errorf("Target with ID `%v` not found in targetResults", t.TargetID()))
 	}
 	br := o.(*ObservableResult).Get()
 
@@ -143,7 +143,7 @@ func (bc *BuildSession) Builds(ts ...targets.Target) []targets.Result {
 }
 
 func (bc *BuildSession) fillTargetDeps(t targets.Target, tgts *map[string]*targetMeta) {
-	tid := t.TargetId()
+	tid := t.TargetID()
 
 	if meta, ok := (*tgts)[tid]; ok {
 		meta.refCounter++
@@ -158,7 +158,7 @@ func (bc *BuildSession) fillTargetDeps(t targets.Target, tgts *map[string]*targe
 	if withDeps, ok := t.(targets.WithDependencies); ok {
 		namesMp := map[string]string{}
 		for name, d := range withDeps.Dependencies() {
-			did := d.TargetId()
+			did := d.TargetID()
 			namesMp[name] = did
 
 			bc.fillTargetDeps(d, tgts)

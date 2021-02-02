@@ -26,7 +26,7 @@ func NewAsciiImage(url string) *AsciiImage {
 	}
 }
 
-func (g *AsciiImage) TargetId() string {
+func (g *AsciiImage) TargetID() string {
 	return fmt.Sprintf("web-resource-%v", g.url)
 }
 

@@ -5,7 +5,7 @@ import (
 )
 
 type Target interface {
-	TargetId() string
+	TargetID() string
 
 	Build(bc BuildContext) Result
 }
@@ -18,8 +18,8 @@ type Modifiable interface {
 	IsModified(since time.Time) bool
 }
 
-type Cachable interface {
-	Cachable() bool
+type Cacheable interface {
+	Cacheable() bool
 }
 
 type ValidFor interface {

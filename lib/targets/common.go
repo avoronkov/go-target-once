@@ -10,7 +10,7 @@ type Common struct {
 	Deps map[string]Target
 }
 
-func (c Common) TargetId() string {
+func (c Common) TargetID() string {
 	if c.Id == "" {
 		panic(fmt.Errorf("Custom.Id is not defined"))
 	}

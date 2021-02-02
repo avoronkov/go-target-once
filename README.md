@@ -57,14 +57,14 @@ type GopherTarget struct {}
 // Make sure that required methods are implemented.
 var _ targets.Target = (*GopherTarget)(nil)
 var _ targets.WithDependencies = (*GopherTarget)(nil)
-var _ targets.Cachable = (*GopherTarget)(nil)
+var _ targets.Cacheable = (*GopherTarget)(nil)
 
-// Declare TargetId: it is used as a key in cache storage.
-func (g *GopherTarget) TargetId() string {
+// Declare TargetID: it is used as a key in cache storage.
+func (g *GopherTarget) TargetID() string {
 	return "gopher-target"
 }
 
-func (g *GopherTarget) Cachable() bool {
+func (g *GopherTarget) Cacheable() bool {
 	return true
 }
 
@@ -119,10 +119,3 @@ Build with `go build -tags=debug` to enable debug logging.
 - Improve resolving "diamond" dependencies.
 - Build methods should return time.Time.
 - Add methods "IsModified" and "BuildIfModified" to support handling "If-Modified-Since" HTTP header.
-
-### Refactorings
-
-Cachable -> Cacheable
-TargetId -> TargetID
-ResultOk -> OK
-ResultFailed -> Failed

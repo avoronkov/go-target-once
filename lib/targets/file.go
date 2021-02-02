@@ -21,7 +21,7 @@ func NewFile(path string) *File {
 	}
 }
 
-func (f *File) TargetId() string {
+func (f *File) TargetID() string {
 	return f.path
 }
 
@@ -29,20 +29,20 @@ func (f *File) TargetId() string {
 func (f *File) Build(bc BuildContext) Result {
 	file, err := os.Open(f.path)
 	if err != nil {
-		return ResultFailed(err)
+		return Failed(err)
 	}
 
 	fi, err := file.Stat()
 	if err != nil {
-		return ResultFailed(err)
+		return Failed(err)
 	}
 
 	content, err := ioutil.ReadAll(file)
 	if err != nil {
-		return ResultFailed(err)
+		return Failed(err)
 	}
 
-	return ResultOkTime(content, fi.ModTime())
+	return OKTime(content, fi.ModTime())
 }
 
 func (f *File) IsModified(since time.Time) bool {

@@ -45,13 +45,13 @@ func (b *Builder) Builds(ts ...targets.Target) (contents []interface{}, times []
 func (b *Builder) Build(t targets.Target) (content interface{}, tm time.Time, err error) {
 	ready, cont, tm := b.isReady(t)
 	if ready {
-		logger.Debugf("(%v) Return content from cache.", t.TargetId())
+		logger.Debugf("(%v) Return content from cache.", t.TargetID())
 		return cont, tm, nil
 	}
 
 	bc := NewBuildContext(b, t)
 
-	logger.Debugf("(%v) Rebuild content", t.TargetId())
+	logger.Debugf("(%v) Rebuild content", t.TargetID())
 	cont, tm, err = t.Build(bc)
 	if err != nil {
 		return cont, tm, err
@@ -59,13 +59,13 @@ func (b *Builder) Build(t targets.Target) (content interface{}, tm time.Time, er
 
 	go bc.Close()
 
-	// Cache only cachable targets
-	if c, ok := t.(targets.Cachable); ok && c.Cachable() {
+	// Cache only Cacheable targets
+	if c, ok := t.(targets.Cacheable); ok && c.Cacheable() {
 		var opts []warehouse.Option
 		if v, ok := t.(targets.ValidFor); ok {
 			opts = append(opts, warehouse.OptValidFor(v.ValidFor()))
 		}
-		b.w.Put(t.TargetId(), cont, tm, opts...)
+		b.w.Put(t.TargetID(), cont, tm, opts...)
 	}
 
 	return cont, tm, nil
@@ -102,7 +102,7 @@ func (b *Builder) IsModified(t targets.Target, since time.Time) bool {
 
 func (b *Builder) isReady(t targets.Target) (bool, interface{}, time.Time) {
 	// Search for saved value
-	cont, tm, ok := b.w.Get(t.TargetId())
+	cont, tm, ok := b.w.Get(t.TargetID())
 	if !ok {
 		return false, nil, time.Time{}
 	}

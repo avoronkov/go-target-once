@@ -33,7 +33,7 @@ func (g *Tgt) Dependencies() map[string]targets.Target {
 }
 
 func (g *Tgt) Build(bc targets.BuildContext) (content interface{}, t time.Time, err error) {
-	log.Printf("[%v] Build()", g.TargetId())
+	log.Printf("[%v] Build()", g.TargetID())
 	s := new(strings.Builder)
 	for k := range g.deps {
 		if k == "2" {
@@ -45,10 +45,10 @@ func (g *Tgt) Build(bc targets.BuildContext) (content interface{}, t time.Time, 
 	return s.String(), time.Now(), nil
 }
 
-func (g *Tgt) TargetId() string {
+func (g *Tgt) TargetID() string {
 	return fmt.Sprintf("target-%v", g.values)
 }
 
-func (g *Tgt) Cachable() bool {
+func (g *Tgt) Cacheable() bool {
 	return true
 }
