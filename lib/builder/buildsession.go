@@ -138,7 +138,11 @@ T:
 			if res.Err != nil {
 				continue
 			}
-			bc.globalCache.Put(id, res.Content, res.Time)
+			var opts []warehouse.Option
+			if v, ok := ct.(targets.ValidFor); ok {
+				opts = append(opts, warehouse.OptValidFor(v.ValidFor()))
+			}
+			bc.globalCache.Put(id, res.Content, res.Time, opts...)
 		}
 	}
 
@@ -198,11 +202,6 @@ func (bc *BuildSession) removeTargetWithDeps(id string, tgts *map[string]*target
 	}
 
 	meta.refCounter--
-	/*
-		if meta.refCounter == 0 {
-			delete(*tgts, id)
-		}
-	*/
 }
 
 func (bc *BuildSession) targetOrDepsModified(id string, since time.Time, tgts map[string]*targetMeta, modified *sync.Map) bool {

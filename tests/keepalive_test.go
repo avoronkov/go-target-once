@@ -62,16 +62,25 @@ func (d *TestDependency) IsModified(since time.Time) bool {
 // Tests
 
 func ExampleKeepAlive() {
-	t1 := targets.KeepAlive(&TestTarget{}, 1*time.Minute)
+	// TODO mock time for this test.
+	t1 := targets.KeepAlive(&TestTarget{}, 50*time.Millisecond)
 	res := builder.Build(t1)
 	fmt.Printf("Built (1): %v (%v)\n", res.Content, res.Err)
 
-	t2 := targets.KeepAlive(&TestTarget{}, 1*time.Minute)
+	t2 := targets.KeepAlive(&TestTarget{}, 50*time.Millisecond)
 	res = builder.Build(t2)
 	fmt.Printf("Built (2): %v (%v)\n", res.Content, res.Err)
+
+	time.Sleep(100 * time.Millisecond)
+	t3 := targets.KeepAlive(&TestTarget{}, 50*time.Millisecond)
+	res = builder.Build(t3)
+	fmt.Printf("Built (3): %v (%v)\n", res.Content, res.Err)
 	// Output:
 	// Dependency: Build()
 	// Target: Build()
 	// Built (1): Target result: Dependency result (<nil>)
 	// Built (2): Target result: Dependency result (<nil>)
+	// Dependency: Build()
+	// Target: Build()
+	// Built (3): Target result: Dependency result (<nil>)
 }
