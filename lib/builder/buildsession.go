@@ -159,6 +159,16 @@ T:
 }
 
 func (bc *BuildSession) Builds(ts ...targets.Target) []targets.Result {
+	if len(ts) == 0 {
+		// Weird but OK
+		return nil
+	}
+
+	if len(ts) == 1 {
+		result := bc.Build(ts[0])
+		return []targets.Result{result}
+	}
+
 	mt := newMultiTarget(ts)
 	result := bc.Build(mt)
 	if result.Err != nil {
