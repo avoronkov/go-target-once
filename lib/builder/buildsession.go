@@ -50,6 +50,11 @@ func (bc *BuildSession) Build(t targets.Target) targets.Result {
 	// TODO : handle locally cached targets
 T:
 	for id, meta := range tgts {
+		if meta.refCounter <= 0 {
+			// Target already removed
+			continue T
+		}
+
 		// check local cache
 		if _, ok := bc.targetResults.Load(id); ok {
 			// no need to build the target
@@ -81,6 +86,17 @@ T:
 			// and remove target and subtargets from tgts
 			bc.removeTargetWithDeps(id, &tgts)
 		}
+	}
+
+	// cleanup tgts
+	var removedIds []string
+	for t, meta := range tgts {
+		if meta.refCounter <= 0 {
+			removedIds = append(removedIds, t)
+		}
+	}
+	for _, t := range removedIds {
+		delete(tgts, t)
 	}
 
 	// Create observable results
@@ -182,9 +198,11 @@ func (bc *BuildSession) removeTargetWithDeps(id string, tgts *map[string]*target
 	}
 
 	meta.refCounter--
-	if meta.refCounter == 0 {
-		delete(*tgts, id)
-	}
+	/*
+		if meta.refCounter == 0 {
+			delete(*tgts, id)
+		}
+	*/
 }
 
 func (bc *BuildSession) targetOrDepsModified(id string, since time.Time, tgts map[string]*targetMeta, modified *sync.Map) bool {
