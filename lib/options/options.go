@@ -22,6 +22,10 @@ func (i *ID) InitTargetID() {
 	i.id = fmt.Sprintf("id:%v:%v", file, line)
 }
 
+func (i *ID) SetTargetID(id string) {
+	i.id = id
+}
+
 func (i *ID) TargetID() string {
 	if i.id == "" {
 		panic(errors.New("InitTargetID is not called"))
