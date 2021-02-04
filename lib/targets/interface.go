@@ -18,8 +18,8 @@ type Modifiable interface {
 	IsModified(since time.Time) bool
 }
 
-type Cacheable interface {
-	Cacheable() bool
+type IsCacheable interface {
+	IsCacheable() bool
 }
 
 type ValidFor interface {

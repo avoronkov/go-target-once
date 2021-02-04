@@ -10,7 +10,7 @@ type keepAlive struct {
 var _ Target = (*keepAlive)(nil)
 var _ Modifiable = (*keepAlive)(nil)
 var _ WithDependencies = (*keepAlive)(nil)
-var _ Cacheable = (*keepAlive)(nil)
+var _ IsCacheable = (*keepAlive)(nil)
 
 func KeepAlive(t Target, d time.Duration) Target {
 	return &keepAlive{
@@ -41,7 +41,7 @@ func (k *keepAlive) ValidFor() time.Duration {
 	return k.duration
 }
 
-func (k *keepAlive) Cacheable() bool {
+func (k *keepAlive) IsCacheable() bool {
 	return true
 }
 

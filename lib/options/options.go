@@ -45,8 +45,8 @@ func (Mutable) IsModified(since time.Time) bool {
 // Cacheable
 type Cacheable struct{}
 
-var _ targets.Cacheable = Cacheable{}
+var _ targets.IsCacheable = Cacheable{}
 
-func (Cacheable) Cacheable() bool {
+func (Cacheable) IsCacheable() bool {
 	return true
 }

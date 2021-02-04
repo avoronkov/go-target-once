@@ -62,7 +62,7 @@ T:
 			continue T
 		}
 
-		if ct, ok := meta.t.(targets.Cacheable); ok && ct.Cacheable() {
+		if ct, ok := meta.t.(targets.IsCacheable); ok && ct.IsCacheable() {
 			// check global cache
 			cont, tm, ok := bc.globalCache.Get(id)
 			if !ok {
@@ -129,7 +129,7 @@ T:
 
 	// cache Cacheable targets
 	for id, tgt := range tgts {
-		if ct, ok := tgt.t.(targets.Cacheable); ok && ct.Cacheable() {
+		if ct, ok := tgt.t.(targets.IsCacheable); ok && ct.IsCacheable() {
 			o, ok := bc.targetResults.Load(id)
 			if !ok {
 				panic(fmt.Errorf("Target with ID `%v` not found in targetResults", id))
