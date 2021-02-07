@@ -1,0 +1,58 @@
+// vim: ft=go
+package syncholder
+
+import (
+	"sync"
+
+	/// Instantiate types
+	"github.com/avoronkov/go-target-once/lib/targets"
+)
+
+type SyncHolder[T any] struct {
+	data T
+	ready bool
+	mutex sync.Mutex
+
+	observers []chan T
+}
+
+func NewSyncHolder[T any]() *SyncHolder[T] {
+	return &SyncHolder[T]{}
+}
+
+func (o *SyncHolder[T]) Put(data T) {
+	o.mutex.Lock()
+	defer o.mutex.Unlock()
+
+	o.data = data
+	o.ready = true
+
+	for _, observer := range o.observers {
+		observer <- data
+		close(observer)
+	}
+	o.observers = []chan T{}
+}
+
+func (o *SyncHolder[T]) Get() T {
+	o.mutex.Lock()
+
+	if o.ready {
+		o.mutex.Unlock()
+		return o.data
+	}
+
+	// wait for data is ready
+	ch := make(chan T)
+	o.observers = append(o.observers, ch)
+	o.mutex.Unlock()
+
+	return <-ch
+}
+
+/// Instantiate types
+type ResultSyncHolder = SyncHolder[*targets.Result]
+
+func NewResultSyncHolder() *ResultSyncHolder {
+	return NewSyncHolder[*targets.Result]()
+}

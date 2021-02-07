@@ -9,12 +9,14 @@ import (
 
 func init() {
 	Logger = log.New(os.Stderr, "[go-target-once] ", log.LstdFlags)
+	Debugf = debugf
+	Warningf = warningf
 }
 
-func Debugf(format string, v ...interface{}) {
+func debugf(format string, v ...interface{}) {
 	Logger.Printf("[debug] "+format, v...)
 }
 
-func Warningf(format string, v ...interface{}) {
+func warningf(format string, v ...interface{}) {
 	Logger.Printf("[warning] "+format, v...)
 }

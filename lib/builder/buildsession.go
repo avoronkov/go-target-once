@@ -7,10 +7,15 @@ import (
 	"sync/atomic"
 	"time"
 
+	"github.com/avoronkov/go-target-once/lib/builder/syncholder"
 	"github.com/avoronkov/go-target-once/lib/logger"
 	"github.com/avoronkov/go-target-once/lib/targets"
 	"github.com/avoronkov/go-target-once/lib/warehouse"
 )
+
+type ObservableResult = syncholder.ResultSyncHolder
+
+var NewObservable = syncholder.NewResultSyncHolder
 
 type BuildSession struct {
 	// Target ID -> *ObservableResult
