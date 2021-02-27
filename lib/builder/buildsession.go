@@ -39,11 +39,15 @@ func NewBuildSession(globalCache warehouse.Warehouse) *BuildSession {
 }
 
 func (bc *BuildSession) Build(t targets.Target) targets.Result {
+	tid := t.TargetID()
+
+	done := make(chan struct{})
+	go bc.trackSlowTargets(tid, done)
+	defer func() { done <- struct{}{} }()
+
 	tgts := map[string]*targetMeta{}
 
 	bc.fillTargetDeps(t, &tgts)
-
-	tid := t.TargetID()
 
 	logger.Debugf("[target=%v] targets (%v) = %+V", tid, len(tgts), tgts)
 
@@ -269,4 +273,16 @@ func (bc *BuildSession) BuiltTargets() (ts []string) {
 	})
 	sort.Strings(ts)
 	return ts
+}
+
+func (b *BuildSession) trackSlowTargets(tg string, done <-chan struct{}) {
+	start := time.Now()
+	for {
+		select {
+		case <-done:
+			return
+		case <-time.After(10 * time.Second):
+			logger.Debugf("Target '%v' is still building (%v)", tg, time.Since(start))
+		}
+	}
 }
