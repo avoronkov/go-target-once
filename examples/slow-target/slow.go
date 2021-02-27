@@ -7,15 +7,17 @@ import (
 )
 
 type Slow struct {
+	Name  string
+	Sleep time.Duration
 }
 
 var _ tg.Target = (*Slow)(nil)
 
-func (*Slow) TargetID() string {
-	return "slow"
+func (s *Slow) TargetID() string {
+	return "slow-" + s.Name
 }
 
-func (*Slow) Build(bc tg.BuildContext) tg.Result {
-	time.Sleep(31 * time.Second)
-	return tg.OK("Finished.")
+func (s *Slow) Build(bc tg.BuildContext) tg.Result {
+	time.Sleep(s.Sleep)
+	return tg.OK(s.Name + ": finished.")
 }

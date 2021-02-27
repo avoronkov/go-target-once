@@ -41,10 +41,6 @@ func NewBuildSession(globalCache warehouse.Warehouse) *BuildSession {
 func (bc *BuildSession) Build(t targets.Target) targets.Result {
 	tid := t.TargetID()
 
-	done := make(chan struct{})
-	go bc.trackSlowTargets(tid, done)
-	defer func() { done <- struct{}{} }()
-
 	tgts := map[string]*targetMeta{}
 
 	bc.fillTargetDeps(t, &tgts)
@@ -121,6 +117,10 @@ T:
 
 	for id, tgt := range tgts {
 		go func(id string, meta targetMeta) {
+			done := make(chan struct{})
+			go bc.trackSlowTargets(id, done)
+			defer func() { done <- struct{}{} }()
+
 			logger.Debugf("Building target '%v'...", id)
 			sc := NewSessionContext(id, bc, meta.depsNames)
 			result := meta.t.Build(sc)
