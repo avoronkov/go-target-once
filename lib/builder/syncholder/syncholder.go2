@@ -11,35 +11,47 @@ import (
 type SyncHolder[T any] struct {
 	data T
 	ready bool
+	mutex sync.Mutex
 
-	cond *sync.Cond
+	observers int
+	notify chan T
 }
 
 func NewSyncHolder[T any]() *SyncHolder[T] {
 	return &SyncHolder[T]{
-		cond: sync.NewCond(new(sync.Mutex)),
+		notify: make(chan T),
 	}
 }
 
 func (o *SyncHolder[T]) Put(data T) {
-	o.cond.L.Lock()
-	defer o.cond.L.Unlock()
+	o.mutex.Lock()
+	defer o.mutex.Unlock()
 
 	o.data = data
 	o.ready = true
 
-	o.cond.Broadcast()
+	if o.observers >= 0 {
+		for i := 0; i < o.observers; i++ {
+			o.notify <- data
+		}
+		close(o.notify)
+		o.observers = -1
+	}
 }
 
 func (o *SyncHolder[T]) Get() T {
-	o.cond.L.Lock()
-	defer o.cond.L.Unlock()
+	o.mutex.Lock()
 
-	for !o.ready {
-		o.cond.Wait()
+	if o.ready {
+		o.mutex.Unlock()
+		return o.data
 	}
 
-	return o.data
+	// wait for data is ready
+	o.observers++
+	o.mutex.Unlock()
+
+	return <-o.notify
 }
 
 /// Instantiate types
